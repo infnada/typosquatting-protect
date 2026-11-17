@@ -179,20 +179,25 @@ test("the warning bar is slim by default and can be set to normal or off", async
 
 test("popup and confirmation page follow the dark color scheme", async () => {
   const background = (target, selector) =>
-    target.locator(selector).evaluate((element) => getComputedStyle(element).backgroundColor);
-  const isDark = (color) => color.match(/\d+/g).slice(0, 3).every((part) => Number(part) < 80);
+    target.locator(selector).first().evaluate((element) => getComputedStyle(element).backgroundColor);
+  const DARK_PAGE = "rgb(30, 31, 34)";
+  const DARK_SURFACE = "rgb(43, 45, 49)";
 
   const popup = await app.openPopup();
-  assert.ok(!isDark(await background(popup, "body")), "light by default");
+  await popup.emulateMedia({ colorScheme: "light" });
+  assert.notEqual(await background(popup, "body"), DARK_PAGE);
+  assert.notEqual(await background(popup, ".toggle-container"), DARK_SURFACE);
   await popup.emulateMedia({ colorScheme: "dark" });
-  assert.ok(isDark(await background(popup, "body")));
-  assert.ok(isDark(await background(popup, ".toggle-container")));
+  assert.equal(await background(popup, "body"), DARK_PAGE);
+  assert.equal(await background(popup, ".toggle-container"), DARK_SURFACE);
   await popup.close();
 
   await gotoBlocked(page, "unknown-shop.net");
+  await page.emulateMedia({ colorScheme: "light" });
+  assert.notEqual(await background(page, ".container"), DARK_SURFACE);
   await page.emulateMedia({ colorScheme: "dark" });
-  assert.ok(isDark(await background(page, "body")));
-  assert.ok(isDark(await background(page, ".container")));
+  assert.equal(await background(page, "body"), DARK_PAGE);
+  assert.equal(await background(page, ".container"), DARK_SURFACE);
   await page.emulateMedia({ colorScheme: "light" });
 });
 
