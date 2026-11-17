@@ -3,6 +3,7 @@
   <head>
     <title>Domain Whitelist Protector</title>
     <meta charset="UTF-8" />
+    <meta name="color-scheme" content="light dark" />
     <style>
       body {
         width: 400px;
@@ -283,6 +284,82 @@
         border-radius: 4px;
         padding: 10px;
         font-size: 12px;
+      }
+      /* Dark mode: follows the browser or system setting */
+      @media (prefers-color-scheme: dark) {
+        body {
+          background-color: #1e1f22;
+          color: #e3e5e8;
+        }
+        h2 {
+          color: #e3e5e8;
+        }
+        .tab-container,
+        .section-title {
+          border-bottom-color: #3f4147;
+        }
+        .tab {
+          background-color: #2b2d31;
+          border-color: #3f4147;
+          color: #a0a4ab;
+        }
+        .tab.active {
+          background-color: #1e1f22;
+          border-color: #3f4147;
+          border-bottom-color: #1e1f22;
+          color: #e3e5e8;
+        }
+        #new-domain,
+        select {
+          background-color: #2b2d31;
+          border: 1px solid #3f4147;
+          color: #e3e5e8;
+        }
+        #new-domain::placeholder {
+          color: #80848e;
+        }
+        ul,
+        .warning {
+          border-color: #3f4147;
+        }
+        li {
+          border-bottom-color: #3f4147;
+        }
+        .empty-list,
+        .managed-note {
+          color: #a0a4ab;
+        }
+        .toggle-container {
+          background-color: #2b2d31;
+          border-color: #3f4147;
+        }
+        .slider {
+          background-color: #5c5f66;
+        }
+        .managed-badge {
+          background-color: #5c5f66;
+        }
+        .redundant-note {
+          background-color: #3a3320;
+          border-color: #6b5a1e;
+          color: #f0e2b0;
+        }
+        button,
+        .github-link,
+        input:checked + .slider,
+        li .wildcard-badge {
+          background-color: #3b6fd4;
+        }
+        button:hover,
+        .github-link:hover {
+          background-color: #4a7de0;
+        }
+        .remove-btn {
+          background-color: #b3323f;
+        }
+        .remove-btn:hover {
+          background-color: #c7404d;
+        }
       }
     </style>
   </head>

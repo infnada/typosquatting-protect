@@ -177,6 +177,25 @@ test("the warning bar is slim by default and can be set to normal or off", async
   await popup.close();
 });
 
+test("popup and confirmation page follow the dark color scheme", async () => {
+  const background = (target, selector) =>
+    target.locator(selector).evaluate((element) => getComputedStyle(element).backgroundColor);
+  const isDark = (color) => color.match(/\d+/g).slice(0, 3).every((part) => Number(part) < 80);
+
+  const popup = await app.openPopup();
+  assert.ok(!isDark(await background(popup, "body")), "light by default");
+  await popup.emulateMedia({ colorScheme: "dark" });
+  assert.ok(isDark(await background(popup, "body")));
+  assert.ok(isDark(await background(popup, ".toggle-container")));
+  await popup.close();
+
+  await gotoBlocked(page, "unknown-shop.net");
+  await page.emulateMedia({ colorScheme: "dark" });
+  assert.ok(isDark(await background(page, "body")));
+  assert.ok(isDark(await background(page, ".container")));
+  await page.emulateMedia({ colorScheme: "light" });
+});
+
 test("the popup normalizes input, asks before adding a lookalike and cleans up", async () => {
   await resetWhitelist(["*.sharepoint.com", "a.example.com", "*.example.com", "keep.de"]);
   const popup = await app.openPopup();
@@ -204,7 +223,7 @@ test("the popup normalizes input, asks before adding a lookalike and cleans up",
   await popup.locator("#whitelist li", { hasText: "sharepoimt.com" }).waitFor();
 
   // Entries covered by a wildcard
-  assert.match(await popup.locator("#redundant-note").innerText(), /^1 /);
+  assert.match(await popup.locator("#redundant-text").innerText(), /: 1$/);
   await popup.click("#redundant-clean");
   await popup.locator("#redundant-note").waitFor({ state: "hidden" });
   const entries = await app.evaluate(() => getUserWhitelist());

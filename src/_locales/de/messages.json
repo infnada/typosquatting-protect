@@ -216,7 +216,7 @@
     "message": "Hinweis Ihrer Organisation"
   },
   "redundantNote": {
-    "message": "$1 Einträge sind bereits durch andere Einträge abgedeckt."
+    "message": "Bereits durch andere Einträge abgedeckt: $1"
   },
   "redundantClean": {
     "message": "Aufräumen"

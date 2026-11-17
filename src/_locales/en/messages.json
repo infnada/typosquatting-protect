@@ -216,7 +216,7 @@
     "message": "Note from your organization"
   },
   "redundantNote": {
-    "message": "$1 entries are already covered by other entries."
+    "message": "Already covered by other entries: $1"
   },
   "redundantClean": {
     "message": "Clean up"

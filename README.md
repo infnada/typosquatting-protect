@@ -29,7 +29,7 @@ can be rolled out and configured centrally through Group Policy.
 - Settings can be locked; an optional note (for example the help desk number) appears on the confirmation page
 - Self-hosted rollout with generated policy templates (ADMX/ADML)
 
-The interface is available in English and German and follows the browser language.
+The interface is available in English and German and follows the browser language. Popup and confirmation page switch to a dark design when the browser or system uses dark mode.
 
 ## Screenshots
 
