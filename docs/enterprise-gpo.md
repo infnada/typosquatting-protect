@@ -41,6 +41,7 @@ Danach liegt in `dist/enterprise`:
 | `update.xml` | Update-Beschreibung für den Webserver |
 | `PolicyDefinitions/` | GPO-Vorlagen (`.admx`, `.adml` in Deutsch und Englisch) |
 | `gpo-values.txt` | Extension-ID und die Werte, die du in die GPO einträgst |
+| `Sync-DwpPolicy.ps1` | Überträgt den Ordner „Global“ nach Chrome und Edge (siehe unten) |
 
 ### 2. Erweiterung packen
 
@@ -116,7 +117,54 @@ Adressen wie `https://firma.sharepoint.com/sites/team` werden auf die Domain
 gekürzt.
 
 Chrome und Edge lesen ihre Richtlinien aus getrennten Bereichen. Wenn ihr
-beide Browser nutzt, trage die Liste in beiden Ordnern ein.
+beide Browser nutzt, trage die Liste in beiden Ordnern ein, oder nutze den
+Ordner „Global“.
+
+### Einmal konfigurieren für beide Browser: der Ordner „Global“
+
+Neben **Google Chrome** und **Microsoft Edge** gibt es unter *Domain Whitelist
+Protector* den Ordner **Global** mit denselben Einstellungen. Kein Browser
+liest diesen Ordner. Er dient als einzige Stelle, an der du die Erweiterung
+pflegst; das Skript `Sync-DwpPolicy.ps1` überträgt die Werte danach in die
+Ordner für Chrome und Edge derselben GPO.
+
+1. Alle Einstellungen der Erweiterung nur unter **Global** setzen
+   (Whitelist, Maildomains, Hinweistext usw.). Die Zwangsinstallation
+   (`ExtensionInstallForcelist`) bleibt wie bisher unter Chrome und Edge.
+2. Auf einem Rechner mit Gruppenrichtlinienverwaltung (zum Beispiel dem
+   Domänencontroller) in PowerShell als Administrator erst einen Probelauf
+   machen. `-WhatIf` zeigt nur an, was passieren würde:
+
+   ```powershell
+   .\Sync-DwpPolicy.ps1 -GpoName "<Name der GPO>" -ExtensionId <Extension-ID> -WhatIf
+   ```
+
+3. Denselben Befehl ohne `-WhatIf` ausführen.
+
+Das Skript ersetzt jedes Mal **alle** Einstellungen der Erweiterung in den
+Ordnern Google Chrome und Microsoft Edge durch die Werte aus Global. Was dort
+von Hand eingetragen wurde, geht dabei verloren; andere Einstellungen der GPO
+bleiben unverändert. Ist Global leer, bricht das Skript ab, statt alles zu
+löschen.
+
+| Parameter | Bedeutung |
+| --- | --- |
+| `-GpoName` | Anzeigename der GPO |
+| `-ExtensionId` | Extension-ID aus `gpo-values.txt` |
+| `-Scope` | `User` (Standard) für Einstellungen unter Benutzerkonfiguration, `Computer` für Computerkonfiguration |
+| `-AllowEmpty` | Erlaubt einen leeren Ordner Global und entfernt dann alle Einstellungen der Erweiterung für Chrome und Edge |
+| `-WhatIf` | Probelauf ohne Änderungen |
+
+Vor dem ersten echten Lauf empfiehlt sich eine Sicherung der GPO, zum Beispiel
+`Backup-GPO -Name "<Name der GPO>" -Path C:\GPO-Backup`.
+
+Startet PowerShell das Skript wegen der Ausführungsrichtlinie nicht, hilft
+für diesen Aufruf `powershell -ExecutionPolicy Bypass -File
+.\Sync-DwpPolicy.ps1 …`.
+
+Der Ordner Global hängt nicht von der Extension-ID ab. Ändert sich die ID,
+bleiben die Einstellungen dort erhalten; nach dem Einspielen der neuen Vorlage
+genügt ein Lauf des Skripts mit der neuen ID.
 
 ## Rollout an eine Opt-in-Gruppe
 
@@ -215,6 +263,7 @@ werden:
 1. GPO öffnen → *Domain Whitelist Protector* → „Firmen-Whitelist“ →
    **Anzeigen…**
 2. Zeile ergänzen oder löschen, mit OK bestätigen.
+3. Wenn du den Ordner Global nutzt: danach `Sync-DwpPolicy.ps1` ausführen.
 
 Die Rechner übernehmen die Änderung beim nächsten Richtlinien-Refresh
 (standardmäßig etwa alle 90 Minuten, sofort mit `gpupdate /force`). Ein

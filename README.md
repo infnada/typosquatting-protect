@@ -85,6 +85,7 @@ This creates everything for the rollout in `dist/enterprise`:
 | `update.xml` | Update description for the web server |
 | `PolicyDefinitions/` | Group Policy templates (English and German) |
 | `gpo-values.txt` | Extension ID and the values to enter in the GPO |
+| `Sync-DwpPolicy.ps1` | Copies the settings from the template's "Global" folder to Chrome and Edge, so they are configured only once |
 
 `key.pem` is created on first use. It defines the extension ID and is needed for every update, so keep it safe and out of the repository.
 
@@ -132,7 +133,8 @@ src/
 └── images/                # Extension icons
 scripts/
 ├── build.js               # Builds the packages
-└── enterprise.js          # Creates the rollout files
+├── enterprise.js          # Creates the rollout files
+└── Sync-DwpPolicy.ps1     # Copies the Global GPO settings to Chrome and Edge
 tests/
 ├── unit/                  # Logic tests (whitelist, settings, lookalikes)
 └── e2e/                   # Browser tests with the extension loaded

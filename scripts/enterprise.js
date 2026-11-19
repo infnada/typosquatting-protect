@@ -20,15 +20,38 @@ const ADMX_NAME = "DomainWhitelistProtector";
 const BROWSERS = [
   {
     prefix: "Chrome",
-    label: "Google Chrome",
+    label: { en: "Google Chrome", de: "Google Chrome" },
     policyRoot: "Software\\Policies\\Google\\Chrome",
   },
   {
     prefix: "Edge",
-    label: "Microsoft Edge",
+    label: { en: "Microsoft Edge", de: "Microsoft Edge" },
     policyRoot: "Software\\Policies\\Microsoft\\Edge",
   },
 ];
+
+// Neutral location that no browser reads. Administrators configure the
+// settings once here; scripts/Sync-DwpPolicy.ps1 copies them to the Chrome
+// and Edge locations of the same GPO. The path does not contain the extension
+// ID, so these settings survive a change of the ID.
+const GLOBAL_KEY = "Software\\Policies\\DomainWhitelistProtector\\Global";
+const GLOBAL = {
+  prefix: "Global",
+  label: {
+    en: "Global (copy to Chrome and Edge with Sync-DwpPolicy.ps1)",
+    de: "Global (per Sync-DwpPolicy.ps1 nach Chrome und Edge übertragen)",
+  },
+  explain: {
+    en: "Settings in this folder are not read by any browser. Configure the extension here once, then run scripts/Sync-DwpPolicy.ps1. The script replaces the extension settings in the Google Chrome and Microsoft Edge folders of the same GPO with these values.",
+    de: "Kein Browser liest die Einstellungen in diesem Ordner. Die Erweiterung hier einmal konfigurieren und danach scripts/Sync-DwpPolicy.ps1 ausführen. Das Skript ersetzt die Einstellungen der Erweiterung in den Ordnern Google Chrome und Microsoft Edge derselben GPO durch diese Werte.",
+  },
+};
+
+function policyKeyFor(target, extensionId) {
+  return target === GLOBAL
+    ? GLOBAL_KEY
+    : `${target.policyRoot}\\3rdparty\\extensions\\${extensionId}\\policy`;
+}
 
 // name: policy name in managed_schema.json;
 // type: "list", "boolean", "text" or "enum"
@@ -253,8 +276,8 @@ function extensionIdFromKey(pemPath) {
 
 function buildAdmx(extensionId) {
   const policies = [];
-  for (const browser of BROWSERS) {
-    const policyKey = `${browser.policyRoot}\\3rdparty\\extensions\\${extensionId}\\policy`;
+  for (const browser of [GLOBAL, ...BROWSERS]) {
+    const policyKey = policyKeyFor(browser, extensionId);
     for (const policy of POLICIES) {
       const id = pascal(policy.name);
       const common = `name="${browser.prefix}_${id}" class="Both" displayName="$(string.${id})" explainText="$(string.${id}_Explain)"`;
@@ -285,10 +308,10 @@ function buildAdmx(extensionId) {
     }
   }
 
-  const categories = BROWSERS.map(
-    (browser) =>
-      `    <category name="Cat_${browser.prefix}" displayName="$(string.Cat_${browser.prefix})">\n      <parentCategory ref="Cat_Root" />\n    </category>`,
-  );
+  const categories = [GLOBAL, ...BROWSERS].map((browser) => {
+    const explain = browser.explain ? ` explainText="$(string.Cat_${browser.prefix}_Explain)"` : "";
+    return `    <category name="Cat_${browser.prefix}" displayName="$(string.Cat_${browser.prefix})"${explain}>\n      <parentCategory ref="Cat_Root" />\n    </category>`;
+  });
 
   return `<?xml version="1.0" encoding="utf-8"?>
 <policyDefinitions xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" revision="1.0" schemaVersion="1.0" xmlns="http://schemas.microsoft.com/GroupPolicy/2006/07/PolicyDefinitions">
@@ -317,7 +340,8 @@ function buildAdml(language) {
   const strings = [
     ["SUPPORTED_Extension", text.supported],
     ["Cat_Root", text.displayName],
-    ...BROWSERS.map((browser) => [`Cat_${browser.prefix}`, browser.label]),
+    ...[GLOBAL, ...BROWSERS].map((browser) => [`Cat_${browser.prefix}`, browser.label[language]]),
+    [`Cat_${GLOBAL.prefix}_Explain`, GLOBAL.explain[language]],
   ];
   const presentations = [];
   for (const policy of POLICIES) {
@@ -425,6 +449,11 @@ function main() {
     buildUpdateXml(extensionId, crxUrl, manifest.version),
   );
 
+  fs.copyFileSync(
+    path.join(__dirname, "Sync-DwpPolicy.ps1"),
+    path.join(OUT_DIR, "Sync-DwpPolicy.ps1"),
+  );
+
   const policyDir = path.join(OUT_DIR, "PolicyDefinitions");
   fs.mkdirSync(path.join(policyDir, "en-US"), { recursive: true });
   fs.mkdirSync(path.join(policyDir, "de-DE"), { recursive: true });
@@ -445,10 +474,13 @@ function main() {
     "",
     "Registry paths the policy templates write to (below HKLM when set",
     "under Computer Configuration, below HKCU under User Configuration):",
-    ...BROWSERS.map(
-      (browser) =>
-        `  ${browser.policyRoot}\\3rdparty\\extensions\\${extensionId}\\policy`,
-    ),
+    ...BROWSERS.map((browser) => `  ${policyKeyFor(browser, extensionId)}`),
+    "",
+    "Folder \"Global\" (read by no browser, copied by the script):",
+    `  ${GLOBAL_KEY}`,
+    "",
+    "After changing the Global folder, copy it to Chrome and Edge:",
+    `  .\\Sync-DwpPolicy.ps1 -GpoName "<GPO name>" -ExtensionId ${extensionId}`,
     "",
   ].join("\r\n");
   fs.writeFileSync(path.join(OUT_DIR, "gpo-values.txt"), values);
@@ -462,6 +494,7 @@ function main() {
   console.log("  update.xml                       for the web server");
   console.log("  PolicyDefinitions/               Group Policy templates");
   console.log("  gpo-values.txt                   values to enter in the GPO");
+  console.log("  Sync-DwpPolicy.ps1               copies the Global settings to Chrome and Edge");
 }
 
 main();
