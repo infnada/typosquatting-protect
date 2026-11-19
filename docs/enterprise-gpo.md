@@ -692,6 +692,10 @@ Die Erweiterung kann warnen, sobald jemand eine Firmen-E-Mail-Adresse in ein
 Feld auf einer nicht freigegebenen Seite eingibt: Das Feld und die
 Passwortfelder der Seite werden rot markiert, und ein Hinweis erscheint direkt
 neben dem Feld. Die Prüfung findet nur im Browser statt.
+Sie reagiert nur auf echte Eingaben des Benutzers (Tippen, Einfügen, Autofill
+des Browsers). Was eine Seite selbst in ein Feld schreibt, wird nicht geprüft,
+sonst könnte sie über die Markierung herausfinden, welche Adressen geschützt
+sind.
 
 Dafür genügt eine Einstellung im selben Ordner wie die Firmen-Whitelist:
 

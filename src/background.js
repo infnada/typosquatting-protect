@@ -177,6 +177,11 @@ async function checkIPGeolocation(url) {
   }
 }
 
+// "*.co.uk" and the like would whitelist a whole domain ending.
+function isSuffixWildcard(entry) {
+  return entry.startsWith("*.") && !getRootDomain(entry.substring(2));
+}
+
 // The country block is enforced here and not only by hiding buttons on the
 // confirmation page: a click before the lookup has finished must not get
 // through either. A failed lookup does not block (see README).
@@ -342,6 +347,7 @@ async function handleMessage(message, sender) {
     case "domainInfo": {
       const settings = await loadSettings();
       return {
+        suffixWildcard: isSuffixWildcard(`*.${message.hostname}`),
         rootDomain: getRootDomain(message.hostname),
         similarTo: findSimilarWhitelisted(message.hostname, settings.whitelist),
         suspicion: findSuspicion(message.hostname, settings.whitelist),
@@ -394,6 +400,7 @@ async function handleMessage(message, sender) {
       if (
         settings.allowUserWhitelist &&
         entry &&
+        !isSuffixWildcard(entry) &&
         isWhitelisted(getWebDomain(message.url), [entry]) &&
         !findSuspicion(getWebDomain(message.url), settings.whitelist) &&
         !(await isCountryBlocked(message.url))

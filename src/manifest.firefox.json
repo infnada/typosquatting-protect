@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Domain Whitelist Protector",
-  "version": "3.3",
+  "version": "3.4",
   "description": "__MSG_extDescription__",
   "default_locale": "en",
   "permissions": ["storage", "tabs", "webNavigation"],

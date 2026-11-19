@@ -286,5 +286,8 @@
   },
   "optionsHeading": {
     "message": "Options"
+  },
+  "alertSuffixWildcard": {
+    "message": "This wildcard would whitelist a whole domain ending (for example *.co.uk). Please enter a specific domain."
   }
 }

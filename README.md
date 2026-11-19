@@ -13,7 +13,7 @@ can be rolled out and configured centrally through Group Policy.
 - **Confirmation page**: non-whitelisted domains are intercepted before they load; you choose to continue once, whitelist, or leave
 - **Warning bar**: a red banner on non-whitelisted pages; closing it hides it for that website until the tab is closed, and it can be turned off entirely. It offers no whitelisting, so a website cannot whitelist itself through it
 - **Lookalike detection**: warns when a domain imitates a whitelisted one, using characters from other alphabets (`аmazon.de` with a Cyrillic "а"), typos (`sharepoimt.com`), visual tricks (`rnicrosoft.com`), other endings (`sharepoint.co`) or the trusted name as a subdomain (`sharepoint.com.evil.net`). Such domains cannot be whitelisted with one click
-- **Sign-in guard**: marks the field red and warns when a company e-mail address is typed on a non-whitelisted page
+- **Sign-in guard**: marks the field red and warns when a company e-mail address is typed on a non-whitelisted page. It reacts only to the user's own input, so a page cannot probe which addresses are protected
 - **Country blocking**: optionally looks up where a non-whitelisted domain is hosted and blocks selected countries
 
 **Whitelist management**

@@ -14,7 +14,7 @@ function generate() {
   fs.cpSync(path.join(ROOT, "src"), path.join(dir, "src"), { recursive: true });
   execFileSync(process.execPath, [
     path.join(dir, "scripts", "enterprise.js"),
-    "--url", "https://intranet.test/extensions",
+    "--url", "https://intranet.test/it's/extensions",
     "--id", "abcdefghijklmnopabcdefghijklmnop",
   ], { cwd: dir, stdio: "ignore" });
   return { dir, out: path.join(dir, "dist", "enterprise") };
@@ -42,5 +42,8 @@ test("policy template has a Global folder outside the browser policy paths", () 
     assert.match(adml, /<string id="Cat_Global_Explain">/);
   }
   assert.ok(fs.existsSync(path.join(out, "Sync-DwpPolicy.ps1")));
+  // An apostrophe in the URL cannot break the single-quoted attribute
+  const updateXml = fs.readFileSync(path.join(out, "update.xml"), "utf8");
+  assert.match(updateXml, /codebase='https:\/\/intranet\.test\/it&apos;s\/extensions\/domain-whitelist-protector\.crx'/);
   fs.rmSync(dir, { recursive: true, force: true });
 });

@@ -89,6 +89,19 @@ test("sign-in guard warns for company e-mail domains only", { skip }, async () =
     return marked(page, "#user");
   };
 
+  // A page cannot test guesses: values it sets and events it creates by
+  // script are not checked.
+  const guessed = await page.evaluate(async () => {
+    const field = document.getElementById("user");
+    field.value = "probe@firma.de";
+    field.dispatchEvent(new Event("input", { bubbles: true }));
+    field.dispatchEvent(new Event("change", { bubbles: true }));
+    await new Promise((resolve) => setTimeout(resolve, 1800));
+    return field.style.outline;
+  });
+  assert.equal(guessed, "", "scripted input is not checked");
+  assert.equal(await page.locator("#whitelist-login-warning").count(), 0);
+
   assert.equal(await type("max.mustermann@firma.d"), false, "incomplete address");
   assert.equal(await type("Max.Mustermann@firma.de"), true);
   assert.ok(await page.locator("#whitelist-login-warning").isVisible());

@@ -27,7 +27,8 @@ async function confirmImportedEntry(entry) {
       action: "domainInfo",
       hostname: entry.replace(/^\*\./, ""),
     });
-    suspicion = info && info.suspicion;
+    if (!info || (entry.startsWith("*.") && info.suffixWildcard)) return false;
+    suspicion = info.suspicion;
   } catch (e) {
     return false;
   }

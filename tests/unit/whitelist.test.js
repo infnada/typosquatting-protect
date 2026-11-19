@@ -95,3 +95,22 @@ test("the warning bar is kept in a closed shadow root", () => {
   const source = require("fs").readFileSync(require("path").join(__dirname, "../../src/content.js"), "utf8");
   assert.match(source, /const BAR_SHADOW_MODE = "closed";/);
 });
+
+test("wildcards for a whole domain ending are refused", async () => {
+  assert.equal(ext.normalizeEntry("*.com"), null);
+  assert.equal(ext.normalizeEntry("*.de"), null);
+  assert.equal(ext.normalizeEntry("*.example.com"), "*.example.com");
+  assert.equal(ext.isSuffixWildcard("*.co.uk"), true);
+  assert.equal(ext.isSuffixWildcard("*.example.co.uk"), false);
+
+  const fresh = loadExtension();
+  const updates = [];
+  fresh.chrome.tabs.update = async (tabId, { url }) => updates.push(url);
+  const sender = { id: "test", url: "chrome-extension://test/confirmation.html?x", tab: { id: 1 } };
+  await fresh.handleMessage(
+    { action: "whitelistAndContinue", domain: "*.co.uk", url: "http://shop.example.co.uk/" },
+    sender,
+  );
+  assert.deepEqual([...(await fresh.getUserWhitelist())], []);
+  assert.deepEqual(updates, []);
+});

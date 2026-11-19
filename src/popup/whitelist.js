@@ -92,6 +92,10 @@ async function addEntry(input) {
       action: "domainInfo",
       hostname: entry.replace(/^\*\./, ""),
     });
+    if (entry.startsWith("*.") && info && info.suffixWildcard) {
+      alert(t("alertSuffixWildcard"));
+      return false;
+    }
     suspicion = info && info.suspicion;
   } catch (e) {
     // Background not reachable; add without the extra check

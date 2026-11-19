@@ -286,5 +286,8 @@
   },
   "optionsHeading": {
     "message": "Optionen"
+  },
+  "alertSuffixWildcard": {
+    "message": "Diese Wildcard würde eine ganze Domain-Endung freigeben (zum Beispiel *.co.uk). Bitte eine konkrete Domain angeben."
   }
 }

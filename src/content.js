@@ -237,16 +237,41 @@ function positionLoginWarning() {
   loginWarning.style.setProperty("top", `${top + window.scrollY}px`, "important");
 }
 
+const LOGIN_WARNING_STYLES = `
+  .warning {
+    box-sizing: border-box;
+    background-color: #d50000;
+    color: #fff;
+    border: 2px solid #7f0000;
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      Helvetica, Arial, sans-serif;
+    font-size: 13px;
+    line-height: 1.4;
+    text-align: left;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  }
+  strong { display: block; font-size: 14px; font-weight: bold; margin-bottom: 3px; }
+`;
+
 function showLoginWarning(field) {
   if (!loginWarning) {
+    // Like the warning bar, the text lives in a closed shadow root.
     loginWarning = document.createElement("div");
     loginWarning.id = "whitelist-login-warning";
-    loginWarning.setAttribute("role", "alert");
+    const root = loginWarning.attachShadow({ mode: BAR_SHADOW_MODE });
+    const style = document.createElement("style");
+    style.textContent = LOGIN_WARNING_STYLES;
+    const box = document.createElement("div");
+    box.className = "warning";
+    box.setAttribute("role", "alert");
     const title = document.createElement("strong");
     title.textContent = t("loginWarningTitle");
     const text = document.createElement("span");
     text.textContent = t("loginWarningText", [getPageDomain()]);
-    loginWarning.append(title, text);
+    box.append(title, text);
+    root.append(style, box);
   }
   loginWarningField = field;
   if (!loginWarning.isConnected) document.documentElement.appendChild(loginWarning);
@@ -296,21 +321,19 @@ function checkField(field) {
   }
 }
 
+// Fields are checked only when the user types into them (or the browser
+// fills them in). Events a page creates by script are ignored, and fields the
+// user has not touched are never checked: otherwise a page could fill in
+// guesses and read from the red marking which ones are company addresses.
 function onFieldEvent(event) {
+  if (!event.isTrusted) return;
   // composedPath reaches fields inside open shadow roots
   const field = event.composedPath ? event.composedPath()[0] : event.target;
   if (field && field.nodeType === Node.ELEMENT_NODE) checkField(field);
 }
 
-// Fields that were filled in by the browser or a password manager
-function scanFields() {
-  if (!isLoginGuardActive()) return;
-  document.querySelectorAll("input, textarea").forEach(checkField);
-}
-
 document.addEventListener("input", onFieldEvent, true);
 document.addEventListener("change", onFieldEvent, true);
-document.addEventListener("focusin", onFieldEvent, true);
 window.addEventListener("scroll", positionLoginWarning, true);
 window.addEventListener("resize", positionLoginWarning);
 
@@ -333,8 +356,6 @@ async function checkDomain() {
   } else {
     protectedLogins = settings.protectedLogins;
     protectedEmailDomains = settings.protectedEmailDomains;
-    scanFields();
-    setTimeout(scanFields, 1500);
     if (settings.enableWarningBar) {
       createWarningBar(
         currentDomain,

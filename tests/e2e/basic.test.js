@@ -106,6 +106,22 @@ test("a domain in a blocked country cannot be continued", async () => {
   await app.evaluate(() => chrome.storage.sync.remove("blockedCountries"));
 });
 
+test("a click that started before the buttons were enabled does not count", async () => {
+  await resetWhitelist(["*.sharepoint.com"]);
+  await page.goto("http://slow-press.test/").catch(() => {});
+  await page.waitForURL((url) => url.pathname === "/confirmation.html");
+  const box = await page.locator("#just-continue").boundingBox();
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.down();
+  await page.locator("body[data-ready]").waitFor({ state: "attached" });
+  await page.mouse.up();
+  await settle(page, 500);
+  assert.equal(new URL(page.url()).pathname, "/confirmation.html");
+  // A fresh click works
+  await page.click("#just-continue");
+  await page.waitForURL("http://slow-press.test/");
+});
+
 test("the confirmation buttons stay disabled until the checks have finished", async () => {
   await page.goto("http://slow-check.test/").catch(() => {});
   await page.waitForURL((url) => url.pathname === "/confirmation.html");

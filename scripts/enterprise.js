@@ -242,7 +242,8 @@ function xml(text) {
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
 }
 
 function pascal(name) {
@@ -420,6 +421,11 @@ function main() {
   }
   if (!/^https?:\/\//i.test(args.url)) {
     fail("--url must start with https:// or http://");
+  }
+  if (/^http:\/\//i.test(args.url)) {
+    console.warn(
+      "WARNING: --url uses http://. Anyone on the network could hold back updates; use https:// if possible.",
+    );
   }
 
   const extensionId = args.key ? extensionIdFromKey(args.key) : args.id;

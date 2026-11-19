@@ -100,6 +100,8 @@ function normalizeEntry(input) {
   }
   hostname = hostname.replace(/\.$/, "");
   if (!hostname) return null;
+  // "*.com" would whitelist every .com domain
+  if (wildcard && !hostname.includes(".")) return null;
 
   return wildcard ? `*.${hostname}` : hostname;
 }
