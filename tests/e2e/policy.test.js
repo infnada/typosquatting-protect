@@ -2,7 +2,7 @@
 // browser's policy directory and are skipped otherwise.
 const { test, after } = require("node:test");
 const assert = require("node:assert/strict");
-const { BAR, POLICY_SKIP_REASON, gotoAllowed, gotoAndContinue, gotoBlocked, launch, policySupported, settle } = require("./helpers");
+const { BAR, barText, POLICY_SKIP_REASON, gotoAllowed, gotoAndContinue, gotoBlocked, launch, policySupported, settle } = require("./helpers");
 
 const skip = policySupported() ? false : POLICY_SKIP_REASON;
 let app;
@@ -47,7 +47,7 @@ test("organization whitelist and locked settings", { skip }, async () => {
   await page.click("#just-continue");
   await page.waitForURL("http://userallowed.test/");
   await page.locator(BAR).waitFor();
-  assert.equal(await page.locator("#whitelist-btn").count(), 0);
+  assert.doesNotMatch(await barText(page), /extension icon/);
 
   await gotoBlocked(page, "blocked.test");
   await page.locator("#title", { hasText: "Blocked Country" }).waitFor();

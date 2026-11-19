@@ -8,12 +8,6 @@
   "barAfter": {
     "message": " könnte unsicher sein"
   },
-  "barWhitelist": {
-    "message": "Domain freigeben"
-  },
-  "barWhitelistWildcard": {
-    "message": "$1 freigeben"
-  },
   "barClose": {
     "message": "Für diese Website ausblenden"
   },
@@ -105,7 +99,7 @@
     "message": "Von Ihrer Organisation verwaltet"
   },
   "managedHeading": {
-    "message": "Von Ihrer Organisation verwaltet:"
+    "message": "Firmen-Whitelist"
   },
   "userLocked": {
     "message": "Ihre Organisation erlaubt keine eigenen Domains."
@@ -116,11 +110,8 @@
   "add": {
     "message": "Hinzufügen"
   },
-  "addCurrent": {
-    "message": "Aktuelle Domain hinzufügen"
-  },
   "userHeading": {
-    "message": "Eigene Domains:"
+    "message": "Eigene Whitelist"
   },
   "emptyWhitelist": {
     "message": "Keine Domains auf der Whitelist"
@@ -139,9 +130,6 @@
   },
   "alertAlreadyListed": {
     "message": "Diese Domain steht bereits auf Ihrer Whitelist."
-  },
-  "alertNotWebPage": {
-    "message": "Der aktuelle Tab ist keine Webseite."
   },
   "countryHeading": {
     "message": "Länder blockieren"
@@ -274,5 +262,29 @@
   },
   "warningBarSizeNormal": {
     "message": "Normal"
+  },
+  "barHint": {
+    "message": "Freigeben über das Symbol der Erweiterung"
+  },
+  "currentPage": {
+    "message": "Aktuelle Seite"
+  },
+  "releaseExact": {
+    "message": "Nur $1 freigeben"
+  },
+  "releaseWildcard": {
+    "message": "$1 freigeben"
+  },
+  "currentWhitelisted": {
+    "message": "✓ Freigegeben (eigene Whitelist)"
+  },
+  "currentManaged": {
+    "message": "✓ Freigegeben (Firmen-Whitelist)"
+  },
+  "currentSuspicious": {
+    "message": "Sieht aus wie $1 – nicht freigeben"
+  },
+  "optionsHeading": {
+    "message": "Optionen"
   }
 }

@@ -47,21 +47,70 @@ function removeWarningBar() {
   releaseSpaceForBar();
 }
 
-function createButton(id, label, onClick) {
-  const button = document.createElement("button");
-  button.id = id;
-  button.textContent = label;
-  button.addEventListener("click", onClick);
-  return button;
-}
+// The bar lives in a closed shadow root: page scripts can neither read its
+// text nor reach its button. (The browser tests switch this to "open".)
+const BAR_SHADOW_MODE = "closed";
+
+const BAR_STYLES = `
+  .bar {
+    box-sizing: border-box;
+    width: 100%;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    background-color: #ff5252;
+    color: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    text-align: left;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  }
+  .warning-text { flex-grow: 1; min-width: 0; }
+  strong { font-weight: bold; }
+  .hint { opacity: 0.9; }
+  button {
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 20px;
+    line-height: 1;
+    padding: 0 5px;
+    cursor: pointer;
+  }
+  .slim {
+    padding: 2px 10px;
+    font-size: 12px;
+    line-height: 1.4;
+    gap: 6px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  }
+  .slim .warning-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .slim button { font-size: 15px; padding: 0 3px; }
+`;
 
 async function createWarningBar(domain, allowUserWhitelist, homograph, size) {
   removeWarningBar();
 
+  // The host element is all the page can see.
+  const host = document.createElement("div");
+  host.id = "whitelist-warning-bar";
+  warningBar = host;
+  const root = host.attachShadow({ mode: BAR_SHADOW_MODE });
+
+  const style = document.createElement("style");
+  style.textContent = BAR_STYLES;
   const bar = document.createElement("div");
-  bar.id = "whitelist-warning-bar";
-  if (size === "slim") bar.classList.add("slim");
-  warningBar = bar;
+  bar.className = size === "slim" ? "bar slim" : "bar";
+  root.append(style, bar);
 
   const text = document.createElement("span");
   text.className = "warning-text";
@@ -93,50 +142,38 @@ async function createWarningBar(domain, allowUserWhitelist, homograph, size) {
     text.appendChild(alert);
   }
 
-  // No one-click whitelisting for domains that look like a trusted one
   const suspicious = Boolean(homograph || (info && info.similarTo));
 
   // The user closed the bar for this website in this tab. Suspicious
   // domains show it again on every page.
   if (info && info.barDismissed && !suspicious) {
-    if (warningBar === bar) warningBar = null;
+    if (warningBar === host) warningBar = null;
     return;
   }
 
+  // Whitelisting happens only in the extension's own pages, which a website
+  // cannot reach. The bar just points there.
   if (allowUserWhitelist && !suspicious) {
-    bar.appendChild(
-      createButton("whitelist-btn", t("barWhitelist"), async () => {
-        await addToUserWhitelist(domain);
-        removeWarningBar();
-      }),
-    );
-
-    if (info && info.rootDomain) {
-      const wildcardDomain = `*.${info.rootDomain}`;
-      bar.appendChild(
-        createButton(
-          "wildcard-whitelist-btn",
-          t("barWhitelistWildcard", [wildcardDomain]),
-          async () => {
-            await addToUserWhitelist(wildcardDomain);
-            removeWarningBar();
-          },
-        ),
-      );
-    }
+    const hint = document.createElement("span");
+    hint.className = "hint";
+    hint.textContent = ` · ${t("barHint")}`;
+    text.appendChild(hint);
   }
 
-  const closeButton = createButton("close-warning-btn", "×", () => {
+  const closeButton = document.createElement("button");
+  closeButton.id = "close-warning-btn";
+  closeButton.textContent = "×";
+  closeButton.title = t("barClose");
+  closeButton.addEventListener("click", () => {
     removeWarningBar();
     browserAPI.runtime.sendMessage({ action: "dismissBar" }).catch(() => {});
   });
-  closeButton.title = t("barClose");
   bar.appendChild(closeButton);
 
   // A newer check may have replaced or dismissed this bar in the meantime.
-  if (warningBar === bar && document.body) {
-    document.body.insertBefore(bar, document.body.firstChild);
-    reserveSpaceForBar(bar);
+  if (warningBar === host && document.body) {
+    document.body.insertBefore(host, document.body.firstChild);
+    reserveSpaceForBar(host);
   }
 }
 
@@ -208,7 +245,7 @@ function showLoginWarning(field) {
     const title = document.createElement("strong");
     title.textContent = t("loginWarningTitle");
     const text = document.createElement("span");
-    text.textContent = t("loginWarningText", [getDomain(window.location.href)]);
+    text.textContent = t("loginWarningText", [getPageDomain()]);
     loginWarning.append(title, text);
   }
   loginWarningField = field;
@@ -277,9 +314,15 @@ document.addEventListener("focusin", onFieldEvent, true);
 window.addEventListener("scroll", positionLoginWarning, true);
 window.addEventListener("resize", positionLoginWarning);
 
+// The website this page belongs to. about:blank and about:srcdoc pages,
+// which a website can fill with its own content, count as that website.
+function getPageDomain() {
+  return getWebDomain(window.location.href) || getWebDomain(self.origin);
+}
+
 async function checkDomain() {
-  if (!isHttpUrl(window.location.href)) return;
-  const currentDomain = getDomain(window.location.href);
+  const currentDomain = getPageDomain();
+  if (!currentDomain) return;
   const settings = await loadSettings();
 
   if (isWhitelisted(currentDomain, settings.whitelist)) {

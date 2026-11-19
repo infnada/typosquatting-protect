@@ -56,6 +56,25 @@ function isHttpUrl(url) {
   return /^https?:\/\//i.test(url || "");
 }
 
+// The website a URL belongs to: the hostname of http(s) URLs, and for blob:
+// URLs the hostname of the page that created them
+// (blob:https://example.com/... belongs to example.com). Empty for anything
+// else, such as browser, extension or file pages.
+function getWebDomain(url) {
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol === "http:" || parsed.protocol === "https:") {
+      return parsed.hostname;
+    }
+    if (parsed.protocol === "blob:" && isHttpUrl(parsed.origin)) {
+      return new URL(parsed.origin).hostname;
+    }
+  } catch (e) {
+    // Not a valid URL
+  }
+  return "";
+}
+
 // Turns user or admin input ("Example.com", "https://example.com/path",
 // "*.example.com") into a canonical whitelist entry, or null if invalid.
 function normalizeEntry(input) {

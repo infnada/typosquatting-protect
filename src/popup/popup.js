@@ -21,10 +21,8 @@ document.addEventListener("DOMContentLoaded", function () {
       cleanUpRedundantEntries();
     });
 
-  // Add current domain button
-  document.getElementById("add-current").addEventListener("click", function () {
-    addCurrentDomain();
-  });
+  // Current website and its whitelisting options
+  loadCurrentPage();
 
   // Enter key in input field
   document
@@ -179,6 +177,7 @@ browserAPI.storage.onChanged.addListener((changes, areaName) => {
   if (settingsChanged(changes, areaName)) {
     loadToggleState();
     loadWhitelist();
+    loadCurrentPage();
     loadBlockedCountries();
   }
 });

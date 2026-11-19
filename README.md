@@ -11,7 +11,7 @@ can be rolled out and configured centrally through Group Policy.
 **Protection**
 
 - **Confirmation page**: non-whitelisted domains are intercepted before they load; you choose to continue once, whitelist, or leave
-- **Warning bar**: a red banner on non-whitelisted pages; closing it hides it for that website until the tab is closed, and it can be turned off entirely
+- **Warning bar**: a red banner on non-whitelisted pages; closing it hides it for that website until the tab is closed, and it can be turned off entirely. It offers no whitelisting, so a website cannot whitelist itself through it
 - **Lookalike detection**: warns when a domain imitates a whitelisted one, using characters from other alphabets (`аmazon.de` with a Cyrillic "а"), typos (`sharepoimt.com`), visual tricks (`rnicrosoft.com`), other endings (`sharepoint.co`) or the trusted name as a subdomain (`sharepoint.com.evil.net`). Such domains cannot be whitelisted with one click
 - **Sign-in guard**: marks the field red and warns when a company e-mail address is typed on a non-whitelisted page
 - **Country blocking**: optionally looks up where a non-whitelisted domain is hosted and blocks selected countries
@@ -20,6 +20,7 @@ can be rolled out and configured centrally through Group Policy.
 
 - Exact domains and wildcards (`*.example.com`)
 - Allow a domain permanently or only for the current browser session
+- Whitelist the current website from the popup with one click (exact domain or `*.domain`)
 - Clean-up hint for entries that other entries already cover
 - Import and export
 
@@ -48,6 +49,9 @@ The interface is available in English and German and follows the browser languag
 3. For any other domain a confirmation page appears. It shows the domain, any lookalike warning, the hosting country (if enabled) and the note from your organization.
 4. You can continue without whitelisting (remembered until the browser closes), whitelist the domain or `*.domain`, or not load the page.
 5. On non-whitelisted pages the warning bar stays visible and the sign-in guard watches the input fields.
+6. To whitelist the website in the current tab later, use the **Current page** box at the top of the popup.
+
+`blob:` pages count as the website that created them, and `about:blank` windows a website fills with content count as that website, so neither gets around these checks.
 
 Hiding the warning bar only hides the bar. Whether a user closes it for a website or it is switched off in the popup or by policy, the confirmation page, the lookalike warnings on it and the sign-in guard keep working.
 

@@ -70,3 +70,28 @@ test("addToUserWhitelist ignores duplicates and invalid entries", async () => {
   assert.equal(await store.addToUserWhitelist("not valid!*"), false);
   assert.deepEqual([...(await store.getUserWhitelist())], ["example.com"]);
 });
+
+test("blob: URLs belong to the website that created them", () => {
+  const ext = loadExtension();
+  assert.equal(ext.getWebDomain("https://Shop.Example.com/path"), "shop.example.com");
+  assert.equal(ext.getWebDomain("blob:https://shop.example.com/0f6c4c1e-1d2b"), "shop.example.com");
+  assert.equal(ext.getWebDomain("blob:null/0f6c4c1e"), "");
+  assert.equal(ext.getWebDomain("about:blank"), "");
+  assert.equal(ext.getWebDomain("chrome-extension://abc/popup.html"), "");
+  assert.equal(ext.getWebDomain("file:///C:/mail.html"), "");
+});
+
+test("a blob: page of a non-whitelisted website gets the confirmation page", async () => {
+  const ext = loadExtension({ sync: { whitelist: ["trusted.example"] } });
+  const updates = [];
+  ext.chrome.tabs.update = async (tabId, { url }) => updates.push(url);
+  await ext.checkTabNavigation(3, "blob:https://trusted.example/abc");
+  await ext.checkTabNavigation(3, "blob:https://phish.example/abc");
+  assert.equal(updates.length, 1);
+  assert.match(updates[0], /confirmation\.html\?domain=phish\.example&/);
+});
+
+test("the warning bar is kept in a closed shadow root", () => {
+  const source = require("fs").readFileSync(require("path").join(__dirname, "../../src/content.js"), "utf8");
+  assert.match(source, /const BAR_SHADOW_MODE = "closed";/);
+});

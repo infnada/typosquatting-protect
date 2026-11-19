@@ -116,15 +116,77 @@ async function addDomain() {
   input.value = "";
 }
 
-async function addCurrentDomain() {
-  const tabs = await browserAPI.tabs.query({
-    active: true,
-    currentWindow: true,
-  });
-  if (tabs[0] && isHttpUrl(tabs[0].url)) {
-    await addEntry(getDomain(tabs[0].url));
-  } else {
-    alert(t("alertNotWebPage"));
+// Box at the top of the popup: the website in the current tab and whether
+// it can be whitelisted. This replaces the buttons that used to sit in the
+// warning bar, where the website itself could reach them.
+async function loadCurrentPage() {
+  const box = document.getElementById("current-page");
+  const status = document.getElementById("current-status");
+  const buttons = document.getElementById("current-buttons");
+
+  const tabs = await browserAPI.tabs.query({ active: true, currentWindow: true });
+  const domain = tabs[0] ? getWebDomain(tabs[0].url) : "";
+  if (!domain) {
+    box.hidden = true;
+    return;
+  }
+
+  const settings = await loadSettings();
+  box.hidden = false;
+  box.classList.remove("suspicious");
+  document.getElementById("current-domain").textContent = domain;
+  buttons.textContent = "";
+
+  const showStatus = (text) => {
+    status.textContent = text;
+    status.hidden = false;
+  };
+  status.hidden = true;
+
+  if (isWhitelisted(domain, settings.managedWhitelist)) {
+    showStatus(t("currentManaged"));
+    return;
+  }
+  if (settings.allowUserWhitelist && isWhitelisted(domain, settings.userWhitelist)) {
+    showStatus(t("currentWhitelisted"));
+    return;
+  }
+  if (!settings.allowUserWhitelist) {
+    showStatus(t("userLocked"));
+    return;
+  }
+
+  let info = null;
+  try {
+    info = await browserAPI.runtime.sendMessage({ action: "domainInfo", hostname: domain });
+  } catch (e) {
+    // Without the check, no one-click whitelisting
+  }
+  if (!info) {
+    box.hidden = true;
+    return;
+  }
+  if (info.suspicion) {
+    box.classList.add("suspicious");
+    showStatus(t("currentSuspicious", [info.suspicion]));
+    return;
+  }
+
+  const addButton = (id, label, entry) => {
+    const button = document.createElement("button");
+    button.id = id;
+    button.textContent = label;
+    button.addEventListener("click", async () => {
+      await addToUserWhitelist(entry);
+      loadWhitelist();
+      loadCurrentPage();
+    });
+    buttons.appendChild(button);
+  };
+  addButton("release-exact", t("releaseExact", [domain]), domain);
+  if (info.rootDomain) {
+    const wildcard = `*.${info.rootDomain}`;
+    addButton("release-wildcard", t("releaseWildcard", [wildcard]), wildcard);
   }
 }
 

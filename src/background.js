@@ -162,7 +162,7 @@ async function checkIPGeolocation(url) {
   }
 
   try {
-    const data = await lookupGeo(settings.geoProvider, new URL(url).hostname);
+    const data = await lookupGeo(settings.geoProvider, getWebDomain(url));
     const countryCode =
       typeof data.countryCode === "string" ? data.countryCode.toUpperCase() : "";
 
@@ -318,9 +318,8 @@ function findSuspicion(hostname, whitelist) {
 
 async function checkTabNavigation(tabId, url) {
   // Only web pages are checked; browser, extension and file pages are not.
-  if (!isHttpUrl(url)) return;
-
-  const domain = getDomain(url);
+  // blob: pages count as the website that created them.
+  const domain = getWebDomain(url);
   if (!domain) return;
 
   const settings = await loadSettings();
@@ -355,12 +354,15 @@ async function handleMessage(message, sender) {
       };
     }
 
-    case "dismissBar":
-      // Only for the page's own domain, as reported by the browser
-      if (sender.tab && isHttpUrl(sender.url)) {
-        await dismissBar(sender.tab.id, getDomain(sender.url));
+    case "dismissBar": {
+      // Only for the page's own domain, as reported by the browser.
+      // about:blank pages report the website that opened them as origin.
+      const domain = getWebDomain(sender.url) || getWebDomain(sender.origin);
+      if (sender.tab && domain) {
+        await dismissBar(sender.tab.id, domain);
       }
       return {};
+    }
 
     case "confirmationInfo": {
       if (!fromConfirmation) return {};
@@ -377,14 +379,14 @@ async function handleMessage(message, sender) {
       return { geo: await checkIPGeolocation(message.url) };
 
     case "continueNavigation":
-      if (!fromConfirmation || !isHttpUrl(message.url)) return {};
+      if (!fromConfirmation || !getWebDomain(message.url)) return {};
       if (await isCountryBlocked(message.url)) return {};
-      await allowDomainForSession(getDomain(message.url));
+      await allowDomainForSession(getWebDomain(message.url));
       await browserAPI.tabs.update(sender.tab.id, { url: message.url });
       return {};
 
     case "whitelistAndContinue": {
-      if (!fromConfirmation || !isHttpUrl(message.url)) return {};
+      if (!fromConfirmation || !getWebDomain(message.url)) return {};
       const settings = await loadSettings();
       const entry = normalizeEntry(message.domain);
       // The entry must cover the page that is being opened.
@@ -392,8 +394,8 @@ async function handleMessage(message, sender) {
       if (
         settings.allowUserWhitelist &&
         entry &&
-        isWhitelisted(getDomain(message.url), [entry]) &&
-        !findSuspicion(getDomain(message.url), settings.whitelist) &&
+        isWhitelisted(getWebDomain(message.url), [entry]) &&
+        !findSuspicion(getWebDomain(message.url), settings.whitelist) &&
         !(await isCountryBlocked(message.url))
       ) {
         await addToUserWhitelist(entry);

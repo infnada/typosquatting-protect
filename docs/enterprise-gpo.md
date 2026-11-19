@@ -444,13 +444,17 @@ können Benutzer zusätzlich eigene Domains freigeben:
 
 - auf der Bestätigungsseite mit **„Freigeben und fortfahren“** (nur diese
   Domain) oder **„\*.domain freigeben und fortfahren“** (mit Subdomains),
-- über die rote Warnleiste auf der Seite,
-- im Popup der Erweiterung über **„Aktuelle Domain hinzufügen“** oder das
-  Eingabefeld.
+- im Popup der Erweiterung im Kasten **„Aktuelle Seite“** mit **„Nur … freigeben“**
+  oder **„\*.domain freigeben“**, oder über das Eingabefeld.
+
+Die rote Warnleiste auf der Seite bietet bewusst keine Freigabe an. Sie liegt
+im Inhalt der besuchten Seite, und eine Webseite könnte sonst sich selbst
+freigeben. Freigeben geht nur in den Seiten der Erweiterung selbst.
 
 Domains, die nach einer Fälschung aussehen (Zeichen aus anderen Alphabeten,
 Ähnlichkeit zu einer Domain der Whitelist), lassen sich auf der
-Bestätigungsseite und in der Warnleiste nicht freigeben.
+Bestätigungsseite und im Kasten „Aktuelle Seite“ nicht freigeben. Über das
+Eingabefeld geht es nur nach ausdrücklicher Bestätigung, ebenso beim Import.
 
 Wird die Einstellung **deaktiviert**, gilt nur noch die Firmen-Whitelist.
 Andere Seiten lassen sich nach der Warnung weiterhin öffnen, aber nicht

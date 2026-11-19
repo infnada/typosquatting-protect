@@ -1,7 +1,7 @@
 // Browser tests without an organization policy.
 const { test, before, after } = require("node:test");
 const assert = require("node:assert/strict");
-const { BAR, EXTENSION_ID, gotoAllowed, gotoAndContinue, gotoBlocked, launch, settle } = require("./helpers");
+const { BAR, barText, EXTENSION_ID, gotoAllowed, gotoAndContinue, gotoBlocked, launch, settle } = require("./helpers");
 
 let app;
 let page;
@@ -37,7 +37,7 @@ test("continuing loads the page and shows the warning bar", async () => {
   await page.click("#just-continue");
   await page.waitForURL("http://www.shop.example.co.uk/path");
   await page.locator(BAR).waitFor();
-  assert.match(await page.locator(BAR).innerText(), /www\.shop\.example\.co\.uk/);
+  assert.match(await barText(page), /www\.shop\.example\.co\.uk/);
 
   // The page starts below the bar instead of being covered by it.
   const bar = await page.locator(BAR).boundingBox();
@@ -52,9 +52,23 @@ test("the session allowance survives a restart of the service worker", async () 
   await gotoAllowed(page, "www.shop.example.co.uk", "/again");
 });
 
-test("whitelisting a wildcard from the bar covers subdomains but not lookalikes", async () => {
-  await page.locator("#wildcard-whitelist-btn").click();
+test("the warning bar offers no whitelisting, the popup does", async () => {
+  await page.locator(BAR).waitFor();
+  assert.equal(await page.locator("#whitelist-btn, #wildcard-whitelist-btn").count(), 0);
+  assert.match(await barText(page), /extension icon/);
+
+  const popup = await app.openPopup();
+  await app.showInPopup(popup, page);
+  assert.equal(await popup.textContent("#current-domain"), "www.shop.example.co.uk");
+  assert.match(await popup.textContent("#release-exact"), /www\.shop\.example\.co\.uk/);
+  assert.match(await popup.textContent("#release-wildcard"), /\*\.example\.co\.uk/);
+  await popup.click("#release-wildcard");
+  await popup.locator("#current-status", { hasText: "your whitelist" }).waitFor();
+  await popup.close();
   await page.locator(BAR).waitFor({ state: "detached" });
+});
+
+test("a wildcard from the popup covers subdomains but not lookalikes", async () => {
   await gotoAllowed(page, "other.example.co.uk");
   await gotoAllowed(page, "example.co.uk");
   assert.equal(await page.locator(BAR).count(), 0);
@@ -134,8 +148,15 @@ test("similar domains are reported and cannot be whitelisted", async () => {
   await page.click("#just-continue");
   await page.waitForURL("http://sharepoimt.com/");
   await page.locator(BAR).waitFor();
-  assert.match(await page.locator(BAR).innerText(), /similar to sharepoint\.com/);
-  assert.equal(await page.locator("#whitelist-btn").count(), 0);
+  assert.match(await barText(page), /similar to sharepoint\.com/);
+  assert.doesNotMatch(await barText(page), /extension icon/);
+
+  // The popup does not offer to whitelist the lookalike either
+  const popup = await app.openPopup();
+  await app.showInPopup(popup, page);
+  assert.match(await popup.textContent("#current-status"), /Looks like sharepoint\.com/);
+  assert.equal(await popup.locator("#current-buttons button").count(), 0);
+  await popup.close();
 
   await gotoBlocked(page, "sharepoint.com.evil.net");
   assert.match(await page.locator("#similar-warning").innerText(), /sharepoint\.com/);
@@ -145,6 +166,33 @@ test("similar domains are reported and cannot be whitelisted", async () => {
   await gotoBlocked(page, "heise.de");
   assert.ok(await page.locator("#similar-warning").isHidden());
   assert.equal(await page.locator("#whitelist-continue").count(), 1);
+});
+
+test("an about:blank window filled by a website gets the warning bar", async () => {
+  await resetWhitelist(["*.sharepoint.com"]);
+  await gotoAndContinue(page, "opener.test");
+  const [popupWindow] = await Promise.all([
+    app.context.waitForEvent("page"),
+    page.evaluate(() => {
+      const w = window.open("");
+      w.document.body.innerHTML = "<h1>Sign in</h1><input id=user type=email>";
+    }),
+  ]);
+  await popupWindow.locator(BAR).waitFor();
+  assert.match(await barText(popupWindow), /opener\.test/);
+  await popupWindow.close();
+});
+
+test("a blob: page counts as the website that created it", async () => {
+  await resetWhitelist(["*.sharepoint.com", "blob-maker.test"]);
+  await gotoAllowed(page, "blob-maker.test");
+  const blobUrl = await page.evaluate(() =>
+    URL.createObjectURL(new Blob(["<h1>Sign in</h1>"], { type: "text/html" })),
+  );
+  await resetWhitelist(["*.sharepoint.com"]);
+  await page.evaluate((url) => (location.href = url), blobUrl);
+  await page.waitForURL((url) => url.pathname === "/confirmation.html");
+  assert.equal(await page.textContent("#domain-name"), "blob-maker.test");
 });
 
 test("closing the warning bar hides it for that website in that tab", async () => {

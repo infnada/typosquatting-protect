@@ -8,12 +8,6 @@
   "barAfter": {
     "message": " could be insecure"
   },
-  "barWhitelist": {
-    "message": "Whitelist this domain"
-  },
-  "barWhitelistWildcard": {
-    "message": "Whitelist $1"
-  },
   "barClose": {
     "message": "Hide for this website"
   },
@@ -105,7 +99,7 @@
     "message": "Managed by your organization"
   },
   "managedHeading": {
-    "message": "Managed by your organization:"
+    "message": "Organization whitelist"
   },
   "userLocked": {
     "message": "Your organization does not allow adding your own domains."
@@ -116,11 +110,8 @@
   "add": {
     "message": "Add"
   },
-  "addCurrent": {
-    "message": "Add Current Domain"
-  },
   "userHeading": {
-    "message": "Whitelisted Domains:"
+    "message": "Your whitelist"
   },
   "emptyWhitelist": {
     "message": "No domains in whitelist"
@@ -139,9 +130,6 @@
   },
   "alertAlreadyListed": {
     "message": "This domain is already in your whitelist."
-  },
-  "alertNotWebPage": {
-    "message": "The current tab is not a web page."
   },
   "countryHeading": {
     "message": "Country Blocking"
@@ -274,5 +262,29 @@
   },
   "warningBarSizeNormal": {
     "message": "Normal"
+  },
+  "barHint": {
+    "message": "Whitelist it from the extension icon"
+  },
+  "currentPage": {
+    "message": "Current page"
+  },
+  "releaseExact": {
+    "message": "Whitelist only $1"
+  },
+  "releaseWildcard": {
+    "message": "Whitelist $1"
+  },
+  "currentWhitelisted": {
+    "message": "✓ Whitelisted (your whitelist)"
+  },
+  "currentManaged": {
+    "message": "✓ Whitelisted (organization whitelist)"
+  },
+  "currentSuspicious": {
+    "message": "Looks like $1 – do not whitelist"
+  },
+  "optionsHeading": {
+    "message": "Options"
   }
 }

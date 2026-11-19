@@ -96,13 +96,19 @@ function prepareExtension(directory) {
   const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
   manifest.key = TEST_KEY;
   fs.writeFileSync(manifestPath, JSON.stringify(manifest));
+  // The warning bar uses a closed shadow root; the tests need to look inside.
+  const contentPath = path.join(directory, "content.js");
+  const content = fs.readFileSync(contentPath, "utf8");
+  const opened = content.replace('const BAR_SHADOW_MODE = "closed";', 'const BAR_SHADOW_MODE = "open";');
+  if (opened === content) throw new Error("BAR_SHADOW_MODE not found in content.js");
+  fs.writeFileSync(contentPath, opened);
 }
 
 // Starts the server and a browser with the extension. Options:
 //   policy  organization policy for the extension (see policySupported)
 //   sync    values for the extension's sync storage, set before the tests
 //   locale  browser language, e.g. "de-DE"
-async function launch({ policy = null, sync = null, locale = "en-US" } = {}) {
+async function launch({ policy = null, sync = null, locale = "en-US", deviceScaleFactor = 1 } = {}) {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "dwp-test-"));
   const extensionDir = path.join(tempDir, "extension");
   prepareExtension(extensionDir);
@@ -117,6 +123,7 @@ async function launch({ policy = null, sync = null, locale = "en-US" } = {}) {
     headless: true,
     locale,
     viewport: { width: 1000, height: 800 },
+    deviceScaleFactor,
     env: { ...process.env, LANGUAGE: language },
     args: [
       `--lang=${language}`,
@@ -144,6 +151,17 @@ async function launch({ policy = null, sync = null, locale = "en-US" } = {}) {
     // Runs a function inside the extension's service worker
     async evaluate(fn, arg) {
       return (await worker()).evaluate(fn, arg);
+    },
+
+    // Makes the tab showing `page` the active tab and refreshes the popup's
+    // "current page" box, as if the popup had been opened on that page.
+    async showInPopup(popup, page) {
+      const url = page.url();
+      await (await worker()).evaluate(async (target) => {
+        const [tab] = await chrome.tabs.query({ url: target.split("#")[0] });
+        await chrome.tabs.update(tab.id, { active: true });
+      }, url);
+      await popup.evaluate(() => loadCurrentPage());
     },
 
     async openPopup() {
@@ -221,7 +239,13 @@ function settle(page, ms = 1200) {
 
 const BAR = "#whitelist-warning-bar";
 
+// Text of the warning bar, which lives in the bar's shadow root
+function barText(page) {
+  return page.locator(`${BAR} .bar`).innerText();
+}
+
 module.exports = {
+  barText,
   BAR,
   EXTENSION_ID,
   POLICY_SKIP_REASON,

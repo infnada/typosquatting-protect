@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Domain Whitelist Protector",
-  "version": "3.2",
+  "version": "3.3",
   "description": "__MSG_extDescription__",
   "default_locale": "en",
   "minimum_chrome_version": "153",
@@ -25,7 +25,9 @@
       "matches": ["<all_urls>"],
       "js": ["common.js", "content.js"],
       "css": ["styles.css"],
-      "run_at": "document_start"
+      "run_at": "document_start",
+      "match_about_blank": true,
+      "match_origin_as_fallback": true
     }
   ],
   "background": {
