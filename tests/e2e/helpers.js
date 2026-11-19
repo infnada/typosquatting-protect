@@ -192,7 +192,7 @@ async function gotoBlocked(page, host, pathname = "/") {
   await page.goto(`http://${host}${pathname}`).catch(() => {});
   await page.waitForURL(() => isConfirmationFor(page, host), { timeout: 15000 });
   // Buttons are adjusted once the page has asked the extension for details
-  await page.locator("#security-details:not(:empty)").waitFor();
+  await page.locator("body[data-ready]").waitFor({ state: "attached" });
 }
 
 // Opens a non-whitelisted host and chooses "Continue Without Whitelisting".

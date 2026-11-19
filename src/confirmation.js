@@ -93,6 +93,8 @@ document.addEventListener("DOMContentLoaded", async function () {
     url: url,
   });
   renderGeo(response && response.geo);
+  // Marks the page as complete (used by the browser tests).
+  document.body.dataset.ready = "true";
 
   function addParagraph(parent, build) {
     const p = document.createElement("p");
@@ -128,12 +130,8 @@ document.addEventListener("DOMContentLoaded", async function () {
     details.textContent = "";
     if (!geo) return;
 
-    if (geo.status === "disabled") {
-      addParagraph(details, (p) => {
-        p.textContent = t("geoDisabled");
-      });
-      return;
-    }
+    // Country checks switched off: show nothing about them.
+    if (geo.status === "disabled") return;
 
     if (geo.status !== "enabled") {
       addParagraph(details, (p) => {

@@ -132,6 +132,17 @@ test("switching the bar off by policy keeps the other protections", { skip }, as
   assert.ok(!(await popup.locator("#warning-bar-toggle").isChecked()));
 });
 
+test("country checks switched off by the organization are hidden", { skip }, async () => {
+  const page = await relaunch({ policy: { enableCountryBlock: false } });
+  await gotoBlocked(page, "unknown-shop.net");
+  assert.ok(await page.locator("#security-details").isHidden());
+  assert.equal(await page.locator("#security-details").innerText(), "");
+
+  const popup = await app.openPopup();
+  assert.ok(await popup.locator('.tab[data-tab="country"]').isHidden());
+  assert.ok(await popup.locator('.tab[data-tab="domains"]').isVisible());
+});
+
 test("the interface follows the browser language", { skip: false }, async () => {
   const page = await relaunch({ locale: "de-DE" });
   await gotoBlocked(page, "unknown-shop.net");

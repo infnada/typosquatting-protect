@@ -44,9 +44,6 @@
   "confirmManaged": {
     "message": "The whitelist is managed by your organization."
   },
-  "geoDisabled": {
-    "message": "Geolocation checks disabled"
-  },
   "geoFailed": {
     "message": "Geolocation lookup failed"
   },

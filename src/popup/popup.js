@@ -138,6 +138,14 @@ async function loadToggleState() {
     document.getElementById(noteId).hidden = !settings.locked[key];
   }
 
+  // Country checks switched off by the organization: hide the whole tab.
+  const countryOff = settings.locked.enableCountryBlock && !settings.enableCountryBlock;
+  const countryTab = document.querySelector('.tab[data-tab="country"]');
+  countryTab.hidden = countryOff;
+  if (countryOff && countryTab.classList.contains("active")) {
+    document.querySelector('.tab[data-tab="domains"]').click();
+  }
+
   const barSize = document.getElementById("warning-bar-size");
   barSize.value = settings.warningBarSize;
   barSize.disabled = settings.locked.warningBarSize;

@@ -44,9 +44,6 @@
   "confirmManaged": {
     "message": "Die Whitelist wird von Ihrer Organisation verwaltet."
   },
-  "geoDisabled": {
-    "message": "Länderprüfung deaktiviert"
-  },
   "geoFailed": {
     "message": "Länderabfrage fehlgeschlagen"
   },
