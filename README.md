@@ -89,6 +89,12 @@ This creates everything for the rollout in `dist/enterprise`:
 
 `key.pem` is created on first use. It defines the extension ID and is needed for every update, so keep it safe and out of the repository.
 
+After packing the `.crx` with that key, check that all files belong to the same extension ID:
+
+```bash
+node scripts/check-ids.js
+```
+
 The step-by-step guide is in German: [docs/enterprise-gpo.md](docs/enterprise-gpo.md).
 
 ## Policies
@@ -134,6 +140,7 @@ src/
 scripts/
 ├── build.js               # Builds the packages
 ├── enterprise.js          # Creates the rollout files
+├── check-ids.js           # Checks that key, CRX, update.xml and template match
 └── Sync-DwpPolicy.ps1     # Copies the Global GPO settings to Chrome and Edge
 tests/
 ├── unit/                  # Logic tests (whitelist, settings, lookalikes)

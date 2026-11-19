@@ -60,6 +60,27 @@ Alternativ per Kommandozeile:
 "C:\Program Files\Google\Chrome\Application\chrome.exe" --pack-extension=C:\pfad\dist\enterprise\domain-whitelist-protector --pack-extension-key=C:\pfad\key.pem
 ```
 
+### Prüfen, ob alle Dateien zusammenpassen
+
+Wird beim Packen versehentlich ein anderer Schlüssel verwendet, bekommt die
+`.crx` eine andere Extension-ID, und die Browser verwerfen sie ohne sichtbare
+Fehlermeldung. Das Prüfskript liest die ID aus `key.pem`, `.crx`,
+`update.xml` und der Vorlage und vergleicht sie:
+
+```bash
+node scripts/check-ids.js
+```
+
+Ohne Parameter prüft es `key.pem` im aktuellen Ordner und die Dateien in
+`dist/enterprise`. Die Ausgabe muss mit „All IDs match“ enden. Bei
+„MISMATCH“ mit der richtigen `key.pem` neu packen. Einzelne Dateien lassen
+sich gezielt angeben, etwa die Kopien auf dem Webserver oder die ID aus
+`chrome://policy`:
+
+```bash
+node scripts/check-ids.js --key key.pem --crx <Pfad>.crx --update-xml <Pfad>/update.xml --admx <Pfad>/DomainWhitelistProtector.admx --id <Extension-ID>
+```
+
 ### 3. Auf den Webserver legen
 
 Lade `domain-whitelist-protector.crx` und `update.xml` in den Ordner, den du
