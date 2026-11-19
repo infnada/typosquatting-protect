@@ -53,8 +53,10 @@ function startServer() {
     if (host === "ip-api.com") {
       const target = decodeURIComponent(request.url.replace("/json/", ""));
       const blocked = target.includes("blocked");
+      // Hosts with "slow" in the name answer late, to test the waiting state
+      const delay = target.includes("slow") ? 1500 : 0;
       response.setHeader("content-type", "application/json");
-      response.end(
+      setTimeout(() => response.end(
         JSON.stringify({
           status: "success",
           country: blocked ? "Russia" : "Germany<img src=x>",
@@ -64,7 +66,7 @@ function startServer() {
           query: "203.0.113.24",
           isp: "Example Hosting",
         }),
-      );
+      ), delay);
       return;
     }
 

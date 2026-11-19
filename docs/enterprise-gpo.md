@@ -673,7 +673,7 @@ Update-Adresse.
 | Abfragedienst für die Länderprüfung | Legt den Dienst fest: ipwho.is oder geojs.io (beide verschlüsselt, Auflösung über Google Public DNS) oder ip-api.com (unverschlüsselt). Vor gewerblicher Nutzung die Nutzungsbedingungen des Dienstes prüfen |
 | Firmen-Maildomains (Warnung bei Anmeldung) | Adressen dieser Domains lösen auf nicht erlaubten Seiten eine rote Warnung am Eingabefeld aus |
 | Hinweistext auf der Bestätigungsseite | Frei wählbarer Text für die Benutzer, z. B. „Im Zweifel IT-Helpdesk anrufen: Durchwahl 123“ |
-| Blockierte Länder | Zweistellige Ländercodes (z. B. `RU`), die immer blockiert sind |
+| Blockierte Länder | Zweistellige Ländercodes (z. B. `RU`). Domains aus diesen Ländern lassen sich auf der Bestätigungsseite weder öffnen noch freigeben. Domains auf einer Whitelist werden nicht geprüft; ist der Abfragedienst nicht erreichbar, lässt sich die Seite trotzdem öffnen |
 
 Nicht konfigurierte Einstellungen bleiben in der Hand der Benutzer.
 

@@ -11,7 +11,18 @@ document.addEventListener("DOMContentLoaded", async function () {
   const whitelistButton = document.getElementById("whitelist-continue");
   const wildcardButton = document.getElementById("wildcard-continue");
   const continueButton = document.getElementById("just-continue");
+  const actionButtons = [whitelistButton, wildcardButton, continueButton];
   let wildcardDomain = null;
+
+  // The options to continue stay disabled until every check has finished;
+  // the service worker enforces the same rules again on each request.
+  actionButtons.forEach((button) => (button.disabled = true));
+
+  // The country lookup can take a moment, so it starts right away.
+  const securityCheck = browserAPI.runtime.sendMessage({
+    action: "securityCheck",
+    url: url,
+  });
 
   whitelistButton.addEventListener("click", function () {
     browserAPI.runtime.sendMessage({
@@ -88,11 +99,9 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   // Geolocation details
-  const response = await browserAPI.runtime.sendMessage({
-    action: "securityCheck",
-    url: url,
-  });
+  const response = await securityCheck.catch(() => null);
   renderGeo(response && response.geo);
+  actionButtons.forEach((button) => (button.disabled = false));
   // Marks the page as complete (used by the browser tests).
   document.body.dataset.ready = "true";
 
@@ -152,6 +161,7 @@ document.addEventListener("DOMContentLoaded", async function () {
           t("geoRiskText"),
         );
       });
+      whitelistButton.remove();
       wildcardButton.remove();
       continueButton.remove();
     }

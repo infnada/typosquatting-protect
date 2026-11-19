@@ -87,7 +87,20 @@ test("a domain in a blocked country cannot be continued", async () => {
   await gotoBlocked(page, "blocked.test");
   await page.locator("#title", { hasText: "Blocked Country" }).waitFor();
   assert.equal(await page.locator("#just-continue").count(), 0);
+  assert.equal(await page.locator("#whitelist-continue").count(), 0);
+  assert.equal(await page.locator("#wildcard-continue").count(), 0);
   await app.evaluate(() => chrome.storage.sync.remove("blockedCountries"));
+});
+
+test("the confirmation buttons stay disabled until the checks have finished", async () => {
+  await page.goto("http://slow-check.test/").catch(() => {});
+  await page.waitForURL((url) => url.pathname === "/confirmation.html");
+  await page.locator("#just-continue").waitFor();
+  assert.equal(await page.locator("#just-continue").isDisabled(), true);
+  assert.equal(await page.locator("#whitelist-continue").isDisabled(), true);
+  await page.locator("body[data-ready]").waitFor({ state: "attached" });
+  assert.equal(await page.locator("#just-continue").isDisabled(), false);
+  assert.equal(await page.locator("#whitelist-continue").isDisabled(), false);
 });
 
 test("lookalike characters are reported and cannot be whitelisted", async () => {
@@ -205,6 +218,27 @@ test("popup and confirmation page follow the dark color scheme", async () => {
   assert.equal(await background(page, "body"), DARK_PAGE);
   assert.equal(await background(page, ".container"), DARK_SURFACE);
   await page.emulateMedia({ colorScheme: "light" });
+});
+
+test("importing a file asks before adding a lookalike", async () => {
+  await resetWhitelist(["*.sharepoint.com"]);
+  const popup = await app.openPopup();
+  const messages = [];
+  popup.on("dialog", (dialog) => {
+    messages.push(dialog.message());
+    return dialog.type() === "confirm" ? dialog.dismiss() : dialog.accept();
+  });
+  await popup.locator("#import-file").setInputFiles({
+    name: "whitelist.json",
+    mimeType: "application/json",
+    buffer: Buffer.from(JSON.stringify({ whitelist: ["sharepoimt.com", "partner.example"], countryBlock: [] })),
+  });
+  await popup.locator("#whitelist li", { hasText: "partner.example" }).waitFor();
+  const entries = await app.evaluate(() => getUserWhitelist());
+  assert.ok(entries.includes("partner.example"));
+  assert.ok(!entries.includes("sharepoimt.com"));
+  assert.ok(messages.some((message) => /sharepoint\.com/.test(message)));
+  await popup.close();
 });
 
 test("the popup normalizes input, asks before adding a lookalike and cleans up", async () => {

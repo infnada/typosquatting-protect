@@ -213,13 +213,13 @@ const POLICIES = [
       title: "Blocked countries",
       listLabel: "Country codes",
       explain:
-        "Countries that are always blocked, as two-letter ISO 3166-1 codes, one per line (for example RU or KP). Only effective while country checks are on.",
+        "Countries that are always blocked, as two-letter ISO 3166-1 codes, one per line (for example RU or KP). Only effective while country checks are on.\n\nA domain hosted in one of these countries cannot be opened or whitelisted from the confirmation page. Domains on a whitelist are not checked, and if the lookup service cannot be reached, the page can still be opened.",
     },
     de: {
       title: "Blockierte Länder",
       listLabel: "Ländercodes",
       explain:
-        "Länder, die immer blockiert sind, als zweistellige ISO-3166-1-Codes, einer pro Zeile (zum Beispiel RU oder KP). Wirkt nur, solange die Länderprüfung eingeschaltet ist.",
+        "Länder, die immer blockiert sind, als zweistellige ISO-3166-1-Codes, einer pro Zeile (zum Beispiel RU oder KP). Wirkt nur, solange die Länderprüfung eingeschaltet ist.\n\nEine Domain, die in einem dieser Länder gehostet wird, lässt sich auf der Bestätigungsseite weder öffnen noch freigeben. Domains auf einer Whitelist werden nicht geprüft, und ist der Abfragedienst nicht erreichbar, lässt sich die Seite trotzdem öffnen.",
     },
   },
 ];

@@ -18,6 +18,22 @@ async function exportData() {
   exportLink.click();
 }
 
+// Returns false if the entry looks like a trusted domain and the user does not
+// confirm it. If the check itself fails, the entry is not imported.
+async function confirmImportedEntry(entry) {
+  let suspicion;
+  try {
+    const info = await browserAPI.runtime.sendMessage({
+      action: "domainInfo",
+      hostname: entry.replace(/^\*\./, ""),
+    });
+    suspicion = info && info.suspicion;
+  } catch (e) {
+    return false;
+  }
+  return !suspicion || confirm(t("confirmSuspicious", [entry, suspicion]));
+}
+
 function importData(event) {
   const file = event.target.files[0];
 
@@ -46,8 +62,15 @@ function importData(event) {
       let whitelist = await getUserWhitelist();
       let countryBlock = result.blockedCountries || [];
 
-      // Add unique domains from imported whitelist
-      whitelist = normalizeList([...whitelist, ...importedData.whitelist]);
+      // Imported entries get the same lookalike check as entries added by
+      // hand: an entry that resembles a trusted domain needs confirmation.
+      const accepted = [];
+      for (const raw of importedData.whitelist) {
+        const entry = normalizeEntry(raw);
+        if (!entry || whitelist.includes(entry) || accepted.includes(entry)) continue;
+        if (await confirmImportedEntry(entry)) accepted.push(entry);
+      }
+      whitelist = normalizeList([...whitelist, ...accepted]);
 
       // Add unique countries from imported countryBlock
       importedData.countryBlock.forEach(function (country) {
@@ -64,7 +87,7 @@ function importData(event) {
 
       alert(
         t("alertImportDone", [
-          String(importedData.whitelist.length),
+          String(accepted.length),
           String(importedData.countryBlock.length),
         ]),
       );

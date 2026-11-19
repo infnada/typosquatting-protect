@@ -134,6 +134,27 @@ const GEO_LOOKUPS = {
   },
 };
 
+// Lookup results are kept for a few minutes, so the confirmation page and a
+// following "continue" share one lookup instead of asking the services twice.
+const GEO_CACHE_MS = 10 * 60 * 1000;
+const GEO_CACHE_MAX = 200;
+const geoCache = new Map();
+
+function lookupGeo(provider, hostname) {
+  const key = `${provider}|${hostname}`;
+  const cached = geoCache.get(key);
+  if (cached && Date.now() - cached.time < GEO_CACHE_MS) return cached.result;
+
+  const result = GEO_LOOKUPS[provider](hostname);
+  geoCache.set(key, { result, time: Date.now() });
+  // Failed lookups are not kept, so the next check tries again.
+  result.catch(() => geoCache.delete(key));
+  if (geoCache.size > GEO_CACHE_MAX) {
+    geoCache.delete(geoCache.keys().next().value);
+  }
+  return result;
+}
+
 async function checkIPGeolocation(url) {
   const settings = await loadSettings();
   if (!settings.enableCountryBlock) {
@@ -141,8 +162,7 @@ async function checkIPGeolocation(url) {
   }
 
   try {
-    const lookup = GEO_LOOKUPS[settings.geoProvider];
-    const data = await lookup(new URL(url).hostname);
+    const data = await lookupGeo(settings.geoProvider, new URL(url).hostname);
     const countryCode =
       typeof data.countryCode === "string" ? data.countryCode.toUpperCase() : "";
 
@@ -155,6 +175,14 @@ async function checkIPGeolocation(url) {
   } catch (error) {
     return { error: "Geolocation lookup failed" };
   }
+}
+
+// The country block is enforced here and not only by hiding buttons on the
+// confirmation page: a click before the lookup has finished must not get
+// through either. A failed lookup does not block (see README).
+async function isCountryBlocked(url) {
+  const geo = await checkIPGeolocation(url);
+  return geo.status === "enabled" && geo.risk === "High";
 }
 
 // Registrable domain ("example.co.uk" for "www.example.co.uk"), used for the
@@ -350,6 +378,7 @@ async function handleMessage(message, sender) {
 
     case "continueNavigation":
       if (!fromConfirmation || !isHttpUrl(message.url)) return {};
+      if (await isCountryBlocked(message.url)) return {};
       await allowDomainForSession(getDomain(message.url));
       await browserAPI.tabs.update(sender.tab.id, { url: message.url });
       return {};
@@ -364,7 +393,8 @@ async function handleMessage(message, sender) {
         settings.allowUserWhitelist &&
         entry &&
         isWhitelisted(getDomain(message.url), [entry]) &&
-        !findSuspicion(getDomain(message.url), settings.whitelist)
+        !findSuspicion(getDomain(message.url), settings.whitelist) &&
+        !(await isCountryBlocked(message.url))
       ) {
         await addToUserWhitelist(entry);
         await browserAPI.tabs.update(sender.tab.id, { url: message.url });

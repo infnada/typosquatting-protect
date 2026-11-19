@@ -113,7 +113,7 @@ Administrators can set these through the generated templates (see `src/managed_s
 | `noticeText` | string | Note shown on the confirmation page |
 | `enableCountryBlock` | boolean | Forces country checks on or off |
 | `geoProvider` | string | Lookup service: `ipwhois`, `geojs` or `ipapi` |
-| `blockedCountries` | list of strings | ISO country codes that are always blocked |
+| `blockedCountries` | list of strings | ISO country codes whose domains cannot be opened or whitelisted from the confirmation page. Whitelisted domains are not checked; if the lookup fails, the page can still be opened |
 
 ## Privacy
 

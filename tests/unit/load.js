@@ -14,7 +14,7 @@ function getDomain(hostname) {
   return parts.length >= size ? parts.slice(-size).join(".") : undefined;
 }
 
-function loadExtension({ policy = {}, sync = {} } = {}) {
+function loadExtension({ policy = {}, sync = {}, fetch } = {}) {
   const listener = { addListener() {} };
   const area = (data) => ({
     async get(keys) {
@@ -59,6 +59,7 @@ function loadExtension({ policy = {}, sync = {} } = {}) {
     AbortSignal,
     setTimeout,
     console,
+    ...(fetch ? { fetch } : {}),
   });
   for (const file of ["common.js", "background.js"]) {
     vm.runInContext(fs.readFileSync(path.join(SRC, file), "utf8"), context, {
