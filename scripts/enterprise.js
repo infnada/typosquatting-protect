@@ -257,7 +257,7 @@ function buildAdmx(extensionId) {
     const policyKey = `${browser.policyRoot}\\3rdparty\\extensions\\${extensionId}\\policy`;
     for (const policy of POLICIES) {
       const id = pascal(policy.name);
-      const common = `name="${browser.prefix}_${id}" class="Machine" displayName="$(string.${id})" explainText="$(string.${id}_Explain)"`;
+      const common = `name="${browser.prefix}_${id}" class="Both" displayName="$(string.${id})" explainText="$(string.${id}_Explain)"`;
       const parents = `      <parentCategory ref="Cat_${browser.prefix}" />\n      <supportedOn ref="SUPPORTED_Extension" />`;
       if (policy.type === "list") {
         policies.push(
@@ -443,10 +443,11 @@ function main() {
     "Value for the force-install list (Chrome and Edge):",
     `  ${extensionId};${updateUrl}`,
     "",
-    "Registry paths the policy templates write to:",
+    "Registry paths the policy templates write to (below HKLM when set",
+    "under Computer Configuration, below HKCU under User Configuration):",
     ...BROWSERS.map(
       (browser) =>
-        `  HKLM\\${browser.policyRoot}\\3rdparty\\extensions\\${extensionId}\\policy`,
+        `  ${browser.policyRoot}\\3rdparty\\extensions\\${extensionId}\\policy`,
     ),
     "",
   ].join("\r\n");

@@ -118,6 +118,35 @@ gekürzt.
 Chrome und Edge lesen ihre Richtlinien aus getrennten Bereichen. Wenn ihr
 beide Browser nutzt, trage die Liste in beiden Ordnern ein.
 
+## Rollout an eine Opt-in-Gruppe
+
+Soll die Erweiterung zunächst nur bei ausgewählten Personen oder Rechnern
+landen, wird die GPO per Sicherheitsfilterung auf eine AD-Gruppe beschränkt.
+Die Einstellungen der Erweiterung gibt es sowohl unter der Computer- als auch
+unter der Benutzerkonfiguration.
+
+| | Benutzergruppe | Computergruppe |
+| --- | --- | --- |
+| Mitglieder der Gruppe | Benutzerkonten | Computerkonten |
+| Einstellungen setzen unter | Benutzerkonfiguration | Computerkonfiguration |
+| GPO verknüpfen mit | OU der Benutzer (oder Domäne) | OU der Computer (oder Domäne) |
+| Wirkt nach | Ab- und Anmelden | Neustart des Rechners |
+
+Alle Einstellungen einer GPO gehören in denselben Zweig: die
+Zwangsinstallation (`ExtensionInstallForcelist`), die Firmen-Whitelist und
+alles Weitere.
+
+Sicherheitsfilterung der GPO (Registerkarte *Bereich*):
+
+1. Unter *Sicherheitsfilterung* „Authentifizierte Benutzer“ entfernen und die
+   Opt-in-Gruppe hinzufügen.
+2. Auf der Registerkarte *Delegierung* „Authentifizierte Benutzer“ wieder
+   hinzufügen, aber nur mit der Berechtigung **Lesen**. Ohne dieses Leserecht
+   wird eine benutzerbezogene GPO nicht angewendet.
+
+Verlässt jemand die Gruppe, entfernt Windows die Richtlinienwerte beim
+nächsten Anwenden wieder, und der Browser deinstalliert die Erweiterung.
+
 ## Alle Einstellungen
 
 | Einstellung | Wirkung |
