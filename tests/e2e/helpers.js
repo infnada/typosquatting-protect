@@ -49,6 +49,8 @@ function removePolicy() {
 function startServer() {
   const server = http.createServer((request, response) => {
     const host = (request.headers.host || "").split(":")[0];
+    // Every page request, so tests can check what reached the network
+    server.requests.push(`${host}${request.url}`);
 
     if (host === "ip-api.com") {
       const target = decodeURIComponent(request.url.replace("/json/", ""));
@@ -70,6 +72,12 @@ function startServer() {
       return;
     }
 
+    if (request.url.startsWith("/redirect?to=")) {
+      response.writeHead(302, { location: decodeURIComponent(request.url.slice("/redirect?to=".length)) });
+      response.end();
+      return;
+    }
+
     response.setHeader("content-type", "text/html; charset=utf-8");
     if (request.url.startsWith("/login")) {
       response.end(
@@ -81,6 +89,7 @@ function startServer() {
     response.end(`<!doctype html><title>${host}</title><body><h1>${host}</h1></body>`);
   });
 
+  server.requests = [];
   return new Promise((resolve) => {
     server.listen(0, "127.0.0.1", () => resolve(server));
   });
@@ -141,6 +150,8 @@ async function launch({ policy = null, sync = null, locale = "en-US", deviceScal
   const app = {
     context,
     extensionId: EXTENSION_ID,
+    // Requests that reached the test server, as "host/path"
+    requests: server.requests,
     worker,
     writePolicy,
 

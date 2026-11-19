@@ -424,6 +424,20 @@ Für die meisten Seiten ist `*.domain` die richtige Wahl, weil sie häufig unter
 `www.` oder weiteren Subdomains laufen. Groß- und Kleinschreibung spielt keine
 Rolle.
 
+**Weiterleitungen:** Jede Station einer Weiterleitung wird geprüft, bevor sie
+aufgerufen wird. Läuft ein Link über einen Weiterleitungsdienst, erscheint die
+Bestätigungsseite für diesen Dienst, bevor das eigentliche Ziel geprüft wird.
+Weiterleitungsdienste, die ihr bewusst nutzt, gehören deshalb auf die
+Firmen-Whitelist, zum Beispiel:
+
+```
+*.safelinks.protection.outlook.com
+```
+
+(Outlook Safe Links). Ebenso die Anmeldedienste, über die eure Anmeldungen
+laufen (bei Microsoft 365 etwa `*.microsoftonline.com`). Danach wird das
+eigentliche Ziel wie jede andere Seite geprüft.
+
 Die Rechner übernehmen Änderungen beim nächsten Richtlinien-Refresh
 (standardmäßig etwa alle 90 Minuten, sofort mit `gpupdate /force`). Die
 Erweiterung muss dafür nicht neu verteilt und der Browser nicht neu gestartet

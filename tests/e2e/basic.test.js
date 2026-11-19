@@ -18,6 +18,7 @@ after(async () => {
 async function resetWhitelist(entries = []) {
   await app.evaluate((list) => setUserWhitelist(list), entries);
   await app.evaluate(() => chrome.storage.session.clear());
+  await app.evaluate(() => syncNavigationRules());
 }
 
 test("a non-whitelisted domain shows the confirmation page", async () => {
@@ -104,6 +105,36 @@ test("a domain in a blocked country cannot be continued", async () => {
   assert.equal(await page.locator("#whitelist-continue").count(), 0);
   assert.equal(await page.locator("#wildcard-continue").count(), 0);
   await app.evaluate(() => chrome.storage.sync.remove("blockedCountries"));
+});
+
+test("a non-whitelisted page is not requested before the user continues", async () => {
+  await resetWhitelist(["*.sharepoint.com"]);
+  const before = app.requests.length;
+  await gotoBlocked(page, "never-loaded.test", "/secret");
+  const sent = () => app.requests.slice(before).filter((r) => r.startsWith("never-loaded.test"));
+  assert.deepEqual(sent(), [], "no request before the decision");
+
+  await page.click("#just-continue");
+  await page.waitForURL("http://never-loaded.test/secret");
+  assert.deepEqual(sent(), ["never-loaded.test/secret"]);
+});
+
+test("a page whitelisted a moment ago loads right away", async () => {
+  await resetWhitelist(["*.sharepoint.com"]);
+  // No waiting for the rules to catch up
+  await app.evaluate(() => setUserWhitelist(["*.sharepoint.com", "just-added.test"]));
+  await page.goto("http://just-added.test/").catch(() => {});
+  await page.locator("h1", { hasText: "just-added.test" }).waitFor();
+  assert.equal(page.url(), "http://just-added.test/");
+});
+
+test("each step of a redirect is checked", async () => {
+  await resetWhitelist(["*.sharepoint.com", "redirector.test"]);
+  // redirector.test is allowed and sends the browser on to another domain
+  await page.goto("http://redirector.test/redirect?to=http://hidden-target.test/").catch(() => {});
+  await page.waitForURL((url) => url.pathname === "/confirmation.html");
+  assert.equal(await page.textContent("#domain-name"), "hidden-target.test");
+  assert.ok(!app.requests.some((r) => r.startsWith("hidden-target.test")));
 });
 
 test("a click that started before the buttons were enabled does not count", async () => {

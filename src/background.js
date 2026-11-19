@@ -53,6 +53,128 @@ browserAPI.webNavigation.onCommitted.addListener((details) => {
   }
 });
 
+// A page blocked by the rules below shows the browser's error page; the
+// confirmation page replaces it.
+browserAPI.webNavigation.onErrorOccurred?.addListener((details) => {
+  if (details.frameId === 0 && /ERR_BLOCKED_BY_CLIENT/.test(details.error || "")) {
+    handleBlockedNavigation(details.tabId, details.url);
+  }
+});
+
+// Retries per tab, so a page is reloaded at most once after a block.
+const blockRetries = new Map();
+
+// A page was blocked before it was requested. Usually it is not whitelisted
+// and the confirmation page follows. If it was whitelisted or allowed just a
+// moment ago, the rules were not up to date yet: bring them up to date and
+// load the page again (once).
+async function handleBlockedNavigation(tabId, url) {
+  await syncNavigationRules();
+  if (await isNavigationAllowed(url)) {
+    const last = blockRetries.get(tabId);
+    if (last && last.url === url && Date.now() - last.time < 5000) return;
+    blockRetries.set(tabId, { url, time: Date.now() });
+    browserAPI.tabs.update(tabId, { url });
+    return;
+  }
+  checkTabNavigation(tabId, url);
+}
+
+// ---------------------------------------------------------------------------
+// Blocking before the request is sent. The browser applies these rules
+// itself: a page that is neither whitelisted nor allowed for this session is
+// not even requested, so none of its content loads before the confirmation
+// page. The rules are kept in step with the whitelist and the session
+// allowances. checkTabNavigation remains as a second line (for example for
+// blob: pages, which are not requested from the network).
+// ---------------------------------------------------------------------------
+const RULE_BLOCK = 1;
+const RULE_WILDCARDS = 2;
+const RULE_FIRST_EXACT = 10;
+const MAIN_FRAME = ["main_frame"];
+
+// Allow rules for exact host names: only the host itself, not its subdomains.
+function exactHostRules(hosts, firstId) {
+  const rules = [];
+  for (const host of hosts) {
+    for (const filter of [`|http://${host}/`, `|https://${host}/`, `|http://${host}:`, `|https://${host}:`]) {
+      rules.push({
+        id: firstId + rules.length,
+        priority: 2,
+        action: { type: "allow" },
+        condition: { urlFilter: filter, resourceTypes: MAIN_FRAME },
+      });
+    }
+  }
+  return rules;
+}
+
+function buildNavigationRules(whitelist) {
+  const rules = [
+    {
+      id: RULE_BLOCK,
+      priority: 1,
+      action: { type: "block" },
+      condition: { regexFilter: "^https?://", resourceTypes: MAIN_FRAME },
+    },
+  ];
+  // "*.example.com" covers example.com and its subdomains, exactly what
+  // requestDomains matches.
+  const wildcards = whitelist.filter((entry) => entry.startsWith("*.")).map((entry) => entry.substring(2));
+  if (wildcards.length) {
+    rules.push({
+      id: RULE_WILDCARDS,
+      priority: 2,
+      action: { type: "allow" },
+      condition: { requestDomains: wildcards, resourceTypes: MAIN_FRAME },
+    });
+  }
+  const exact = whitelist.filter((entry) => !entry.startsWith("*."));
+  return rules.concat(exactHostRules(exact, RULE_FIRST_EXACT));
+}
+
+async function replaceRules(get, update, rules) {
+  const old = await get();
+  await update({ removeRuleIds: old.map((rule) => rule.id), addRules: rules });
+}
+
+// Updates run one after another, so a later update always wins.
+let rulesUpdate = Promise.resolve();
+
+function syncNavigationRules() {
+  rulesUpdate = rulesUpdate
+    .catch(() => {})
+    .then(async () => {
+      const dnr = browserAPI.declarativeNetRequest;
+      if (!dnr) return;
+      const settings = await loadSettings();
+      const active = settings.enablePreemptiveChecks;
+      await replaceRules(
+        () => dnr.getDynamicRules(),
+        (options) => dnr.updateDynamicRules(options),
+        active ? buildNavigationRules(settings.whitelist) : [],
+      );
+      await replaceRules(
+        () => dnr.getSessionRules(),
+        (options) => dnr.updateSessionRules(options),
+        active ? exactHostRules(await getSessionAllowedDomains(), 1) : [],
+      );
+    });
+  return rulesUpdate;
+}
+
+browserAPI.storage.onChanged.addListener((changes, areaName) => {
+  if (
+    settingsChanged(changes, areaName) ||
+    (areaName === "session" && "sessionAllowedDomains" in changes)
+  ) {
+    syncNavigationRules();
+  }
+});
+browserAPI.runtime.onStartup?.addListener(() => syncNavigationRules());
+browserAPI.runtime.onInstalled?.addListener(() => syncNavigationRules());
+syncNavigationRules();
+
 async function fetchJson(url, headers) {
   const response = await fetch(url, {
     headers,
@@ -321,21 +443,32 @@ function findSuspicion(hostname, whitelist) {
   return findSimilarWhitelisted(hostname, whitelist);
 }
 
+// True if a page can load without the confirmation page.
+async function isNavigationAllowed(url) {
+  const domain = getWebDomain(url);
+  if (!domain) return true;
+  const settings = await loadSettings();
+  if (!settings.enablePreemptiveChecks) return true;
+  if (isWhitelisted(domain, settings.whitelist)) return true;
+  return (await getSessionAllowedDomains()).includes(domain);
+}
+
 async function checkTabNavigation(tabId, url) {
   // Only web pages are checked; browser, extension and file pages are not.
   // blob: pages count as the website that created them.
   const domain = getWebDomain(url);
   if (!domain) return;
+  if (await isNavigationAllowed(url)) return;
 
-  const settings = await loadSettings();
-  if (!settings.enablePreemptiveChecks) return;
-  if (isWhitelisted(domain, settings.whitelist)) return;
-  if ((await getSessionAllowedDomains()).includes(domain)) return;
-
-  browserAPI.tabs.update(tabId, {
-    url: `${CONFIRMATION_URL}?domain=${encodeURIComponent(domain)}&url=${encodeURIComponent(url)}`,
-  });
+  // The blocked error page reports both an error and a commit; redirect once.
+  const target = `${CONFIRMATION_URL}?domain=${encodeURIComponent(domain)}&url=${encodeURIComponent(url)}`;
+  const last = lastRedirect.get(tabId);
+  if (last && last.target === target && Date.now() - last.time < 2000) return;
+  lastRedirect.set(tabId, { target, time: Date.now() });
+  browserAPI.tabs.update(tabId, { url: target });
 }
+
+const lastRedirect = new Map();
 
 async function handleMessage(message, sender) {
   const fromExtensionPage =
@@ -388,6 +521,8 @@ async function handleMessage(message, sender) {
       if (!fromConfirmation || !getWebDomain(message.url)) return {};
       if (await isCountryBlocked(message.url)) return {};
       await allowDomainForSession(getWebDomain(message.url));
+      // The browser must know about the allowance before the page is requested
+      await syncNavigationRules();
       await browserAPI.tabs.update(sender.tab.id, { url: message.url });
       return {};
 
@@ -406,6 +541,7 @@ async function handleMessage(message, sender) {
         !(await isCountryBlocked(message.url))
       ) {
         await addToUserWhitelist(entry);
+        await syncNavigationRules();
         await browserAPI.tabs.update(sender.tab.id, { url: message.url });
       }
       return {};

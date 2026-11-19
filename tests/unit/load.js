@@ -14,6 +14,26 @@ function getDomain(hostname) {
   return parts.length >= size ? parts.slice(-size).join(".") : undefined;
 }
 
+// Stand-in for declarativeNetRequest: keeps the rules so tests can read them.
+function ruleStore() {
+  const sets = { dynamic: [], session: [] };
+  const update = (name) => async ({ removeRuleIds = [], addRules = [] }) => {
+    const kept = sets[name].filter((rule) => !removeRuleIds.includes(rule.id));
+    const ids = new Set(kept.map((rule) => rule.id));
+    for (const rule of addRules) {
+      if (ids.has(rule.id)) throw new Error(`duplicate rule id ${rule.id}`);
+      ids.add(rule.id);
+    }
+    sets[name] = kept.concat(addRules);
+  };
+  return {
+    getDynamicRules: async () => sets.dynamic,
+    getSessionRules: async () => sets.session,
+    updateDynamicRules: update("dynamic"),
+    updateSessionRules: update("session"),
+  };
+}
+
 function loadExtension({ policy = {}, sync = {}, fetch } = {}) {
   const listener = { addListener() {} };
   const area = (data) => ({
@@ -40,7 +60,7 @@ function loadExtension({ policy = {}, sync = {}, fetch } = {}) {
       onMessage: listener,
     },
     i18n: { getMessage: () => "", getUILanguage: () => "en" },
-    webNavigation: { onCommitted: listener },
+    webNavigation: { onCommitted: listener, onErrorOccurred: listener },
     tabs: { onRemoved: listener },
     publicSuffix: { getDomain },
     storage: {
@@ -48,7 +68,9 @@ function loadExtension({ policy = {}, sync = {}, fetch } = {}) {
       local: area({}),
       session: area({}),
       managed: area(policy),
+      onChanged: listener,
     },
+    declarativeNetRequest: ruleStore(),
   };
 
   const context = vm.createContext({

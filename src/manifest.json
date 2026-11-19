@@ -1,11 +1,17 @@
 {
   "manifest_version": 3,
   "name": "Domain Whitelist Protector",
-  "version": "3.4",
+  "version": "3.5",
   "description": "__MSG_extDescription__",
   "default_locale": "en",
   "minimum_chrome_version": "153",
-  "permissions": ["storage", "tabs", "webNavigation", "publicSuffix"],
+  "permissions": [
+    "storage",
+    "tabs",
+    "webNavigation",
+    "publicSuffix",
+    "declarativeNetRequest"
+  ],
   "host_permissions": ["<all_urls>"],
   "action": {
     "default_popup": "popup/popup.html",

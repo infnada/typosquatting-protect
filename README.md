@@ -10,7 +10,7 @@ can be rolled out and configured centrally through Group Policy.
 
 **Protection**
 
-- **Confirmation page**: non-whitelisted domains are intercepted before they load; you choose to continue once, whitelist, or leave
+- **Confirmation page**: non-whitelisted domains are intercepted before they are even requested, so nothing of the page loads; you choose to continue once, whitelist, or leave
 - **Warning bar**: a red banner on non-whitelisted pages; closing it hides it for that website until the tab is closed, and it can be turned off entirely. It offers no whitelisting, so a website cannot whitelist itself through it
 - **Lookalike detection**: warns when a domain imitates a whitelisted one, using characters from other alphabets (`аmazon.de` with a Cyrillic "а"), typos (`sharepoimt.com`), visual tricks (`rnicrosoft.com`), other endings (`sharepoint.co`) or the trusted name as a subdomain (`sharepoint.com.evil.net`). Such domains cannot be whitelisted with one click
 - **Sign-in guard**: marks the field red and warns when a company e-mail address is typed on a non-whitelisted page. It reacts only to the user's own input, so a page cannot probe which addresses are protected
@@ -44,7 +44,7 @@ The interface is available in English and German and follows the browser languag
 
 ## How it works
 
-1. When a page starts to load, the extension checks its domain against the organization whitelist and your own whitelist.
+1. Before a page is requested, the browser checks its domain against the organization whitelist and your own whitelist (using `declarativeNetRequest` rules the extension keeps up to date). Every step of a redirect is checked, so a redirect from a whitelisted site to another domain is caught as well.
 2. Whitelisted domains load as usual.
 3. For any other domain a confirmation page appears. It shows the domain, any lookalike warning, the hosting country (if enabled) and the note from your organization.
 4. You can continue without whitelisting (remembered until the browser closes), whitelist the domain or `*.domain`, or not load the page.
@@ -61,6 +61,8 @@ The similarity and lookalike checks compare the domain with your whitelist insid
 
 - Google Chrome or Microsoft Edge, version 153 or later
 - [Node.js](https://nodejs.org/) only for building packages
+
+The extension asks for the `declarativeNetRequest` permission to block non-whitelisted pages before they are requested. When an existing installation is updated to a version that adds this permission, Chrome asks the user to approve it; force-installed extensions get it automatically.
 
 A Firefox package is still built from `src/manifest.firefox.json`, but it has not been tested with the current version and is not covered by the enterprise rollout.
 
