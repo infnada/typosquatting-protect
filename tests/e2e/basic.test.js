@@ -38,6 +38,11 @@ test("continuing loads the page and shows the warning bar", async () => {
   await page.waitForURL("http://www.shop.example.co.uk/path");
   await page.locator(BAR).waitFor();
   assert.match(await page.locator(BAR).innerText(), /www\.shop\.example\.co\.uk/);
+
+  // The page starts below the bar instead of being covered by it.
+  const bar = await page.locator(BAR).boundingBox();
+  const heading = await page.locator("h1").boundingBox();
+  assert.ok(heading.y >= bar.y + bar.height, `heading at ${heading.y}, bar ends at ${bar.y + bar.height}`);
 });
 
 test("the session allowance survives a restart of the service worker", async () => {
@@ -135,6 +140,7 @@ test("closing the warning bar hides it for that website in that tab", async () =
   await page.locator(BAR).waitFor();
   await page.click("#close-warning-btn");
   await page.locator(BAR).waitFor({ state: "detached" });
+  assert.equal(await page.evaluate(() => document.documentElement.style.marginTop), "", "page moves back up");
 
   await gotoAllowed(page, "heise.de", "/other-page");
   assert.equal(await page.locator(BAR).count(), 0, "next page of the same website");

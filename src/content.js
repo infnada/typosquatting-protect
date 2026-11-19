@@ -1,11 +1,50 @@
 // common.js is loaded before this file (see manifest).
 let warningBar = null;
 
+// The page is moved down by the height of the bar, so the bar does not cover
+// the top of the page. The previous inline value is restored afterwards.
+let savedPageMargin = null;
+let barResizeObserver = null;
+
+function reserveSpaceForBar(bar) {
+  const html = document.documentElement;
+  if (savedPageMargin === null) {
+    savedPageMargin = {
+      value: html.style.getPropertyValue("margin-top"),
+      priority: html.style.getPropertyPriority("margin-top"),
+    };
+  }
+  const apply = () => {
+    if (!bar.isConnected) return;
+    html.style.setProperty("margin-top", `${bar.offsetHeight}px`, "important");
+  };
+  apply();
+  // The bar gets taller when its text wraps in a narrow window.
+  barResizeObserver = new ResizeObserver(apply);
+  barResizeObserver.observe(bar);
+}
+
+function releaseSpaceForBar() {
+  if (barResizeObserver) {
+    barResizeObserver.disconnect();
+    barResizeObserver = null;
+  }
+  if (savedPageMargin === null) return;
+  const html = document.documentElement;
+  if (savedPageMargin.value) {
+    html.style.setProperty("margin-top", savedPageMargin.value, savedPageMargin.priority);
+  } else {
+    html.style.removeProperty("margin-top");
+  }
+  savedPageMargin = null;
+}
+
 function removeWarningBar() {
   if (warningBar) {
     warningBar.remove();
     warningBar = null;
   }
+  releaseSpaceForBar();
 }
 
 function createButton(id, label, onClick) {
@@ -97,6 +136,7 @@ async function createWarningBar(domain, allowUserWhitelist, homograph, size) {
   // A newer check may have replaced or dismissed this bar in the meantime.
   if (warningBar === bar && document.body) {
     document.body.insertBefore(bar, document.body.firstChild);
+    reserveSpaceForBar(bar);
   }
 }
 
