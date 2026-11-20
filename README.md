@@ -2,117 +2,187 @@
 
 ![Domain Whitelist Protector Logo](src/images/icon128.png)
 
-A browser extension that protects against typosquatting and phishing by showing warnings for non-whitelisted domains.
+A browser extension for Chrome and Edge that protects against typosquatting and
+phishing. It warns before a domain loads that is not on your whitelist, and it
+can be rolled out and configured centrally through Group Policy.
 
-## 🛡️ Features
+## Features
 
-- **Preemptive Domain Protection**: Get alerted before visiting non-whitelisted domains or blocked countries
-- **Visual Warning Bar**: See a clear red warning banner on non-whitelisted websites
-- **Flexible Configuration**: Choose to whitelist domains permanently or allow temporarily for a session
-- **Import/Export Functionality**: Easily backup and transfer your whitelist between devices
-- **Simple Management**: Add the current domain to your whitelist with a single click
+**Protection**
 
-## 📸 Screenshots
+- **Confirmation page**: non-whitelisted domains are intercepted before they are even requested, so nothing of the page loads; you choose to continue once, whitelist, or leave
+- **Warning bar**: a red banner on non-whitelisted pages; closing it hides it for that website until the tab is closed, and it can be turned off entirely. It offers no whitelisting, so a website cannot whitelist itself through it
+- **Lookalike detection**: warns when a domain imitates a whitelisted one, using characters from other alphabets (`аmazon.de` with a Cyrillic "а"), typos (`sharepoimt.com`), visual tricks (`rnicrosoft.com`), other endings (`sharepoint.co`) or the trusted name as a subdomain (`sharepoint.com.evil.net`). Such domains cannot be whitelisted with one click
+- **Sign-in guard**: marks the field red and warns when a company e-mail address is typed on a non-whitelisted page. It reacts only to the user's own input, so a page cannot probe which addresses are protected
+- **Country blocking**: optionally looks up where a non-whitelisted domain is hosted and blocks selected countries
 
-| Warning Bar                            | Confirmation Page                             | Country Blocked Page                     | Settings Panel                                |
-| -------------------------------------- | --------------------------------------------- | ---------------------------------------- | --------------------------------------------- |
-| ![Warning Bar](assets/warning-bar.png) | ![Confirmation Page](assets/confirmation.png) | ![Confirmation Page](assets/blocked.png) | ![Settings Panel](assets/settings-pannel.png) |
+**Whitelist management**
 
-## 🔍 How It Works
+- Exact domains and wildcards (`*.example.com`)
+- Allow a domain permanently or only for the current browser session
+- Whitelist the current website from the popup with one click (exact domain or `*.domain`)
+- Clean-up hint for entries that other entries already cover
+- Import and export
 
-1. **Domain Protection**: When you visit a website, the extension checks if the domain is in your whitelist
-2. **Safe Navigation**: For non-whitelisted domains, the extension shows a confirmation page
-3. **User Control**: You decide whether to continue, whitelist, or exit from the suspicious domain
-4. **Session Allowance**: Choose to allow a domain just for the current session without adding it to your permanent whitelist
+**For organizations**
 
-## 🚀 Installation
+- Central whitelist through Group Policy that users cannot remove
+- Settings can be locked; an optional note (for example the help desk number) appears on the confirmation page
+- Self-hosted rollout with generated policy templates (ADMX/ADML)
 
-### Chrome Web Store
+The interface is available in English and German and follows the browser language. Popup and confirmation page switch to a dark design when the browser or system uses dark mode.
 
-[![Chrome Web Store](assets/download-chrome.svg)](https://chrome.google.com/webstore/)
+## Screenshots
 
-### Mozilla Add-ons
+| Confirmation page | Lookalike warning |
+| --- | --- |
+| ![Confirmation page](assets/confirmation.png) | ![Lookalike warning](assets/lookalike.png) |
 
-[![Firefox Add-ons](assets/download-firefox.svg)](https://addons.mozilla.org/en-US/firefox/addon/domain-whitelist-protector/)
+| Warning bar and sign-in guard | Popup |
+| --- | --- |
+| ![Warning bar](assets/warning-bar.png) ![Sign-in guard](assets/sign-in-guard.png) | ![Popup](assets/popup.png) |
 
-## 🛠️ Manual Installation
+## How it works
 
-### Chrome
+1. Before a page is requested, the browser checks its domain against the organization whitelist and your own whitelist (using `declarativeNetRequest` rules the extension keeps up to date). Every step of a redirect is checked, so a redirect from a whitelisted site to another domain is caught as well.
+2. Whitelisted domains load as usual.
+3. For any other domain a confirmation page appears. It shows the domain, any lookalike warning, the hosting country (if enabled) and the note from your organization.
+4. You can continue without whitelisting (remembered until the browser closes), whitelist the domain or `*.domain`, or not load the page.
+5. On non-whitelisted pages the warning bar stays visible and the sign-in guard watches the input fields.
+6. To whitelist the website in the current tab later, use the **Current page** box at the top of the popup.
 
-1. Download this repository as a ZIP file and unpack it
-2. Go to `chrome://extensions/`
+`blob:` pages count as the website that created them, and `about:blank` windows a website fills with content count as that website, so neither gets around these checks.
+
+Hiding the warning bar only hides the bar. Whether a user closes it for a website or it is switched off in the popup or by policy, the confirmation page, the lookalike warnings on it and the sign-in guard keep working.
+
+The similarity and lookalike checks compare the domain with your whitelist inside the browser. They are hints, not proof: `bahn.com` is reported as similar to `bahn.de`, for example.
+
+## Requirements
+
+- Google Chrome or Microsoft Edge, version 153 or later
+- [Node.js](https://nodejs.org/) only for building packages
+
+The extension asks for the `declarativeNetRequest` permission to block non-whitelisted pages before they are requested. When an existing installation is updated to a version that adds this permission, Chrome asks the user to approve it; force-installed extensions get it automatically.
+
+A Firefox package is still built from `src/manifest.firefox.json`, but it has not been tested with the current version and is not covered by the enterprise rollout.
+
+## Installation
+
+### For testing (unpacked)
+
+1. Download or clone this repository
+2. Open `chrome://extensions/` (Edge: `edge://extensions/`)
 3. Enable "Developer mode"
-4. Click "Load unpacked" and select the unpacked src/ directory
+4. Click "Load unpacked" and select the `src/` directory
 
-### Firefox
+### For an organization
 
-1. Download this repository as a ZIP file and unpack it
-2. Rename `src/manifest.json` to `src/manifest.chrome.json`
-3. Rename `src/manifest.firefox.json` to `src/manifest.json`
-4. Go to `about:debugging#/runtime/this-firefox`
-5. Click "Load Temporary Add-on"
-6. Select any file in the unpacked src/ directory
-
-## 🔒 Privacy
-
-This extension:
-
-- Does not collect any data about your browsing habits
-- Does not send any information to remote servers
-- Stores your whitelist only on your local machine
-- Requires minimal permissions to function
-
-## 👨‍💻 For Developers
-
-### Project Structure
-
-```
-domain-whitelist-protector/src/
-├── manifest.json        # Extension configuration
-├── background.js        # Main extension logic
-├── content.js           # Content script for warning bar
-├── popup.html           # Whitelist management UI
-├── popup.js             # Whitelist management logic
-├── confirmation.html    # Safety confirmation page
-├── confirmation.js      # Confirmation page logic
-├── styles.css           # Warning bar styles
-└── images/              # Extension icons
-```
-
-### Building from Source
+The extension is self-hosted and force-installed through Group Policy:
 
 ```bash
-# Clone the repository
-git clone https://github.com/infnada/typosquatting-protect.git
+node scripts/enterprise.js --url https://intranet.example.com/extensions --key key.pem
+```
 
-# Navigate to the directory
+This creates everything for the rollout in `dist/enterprise`:
+
+| File / folder | Purpose |
+| --- | --- |
+| `domain-whitelist-protector/` | The extension, ready to pack as `.crx` |
+| `update.xml` | Update description for the web server |
+| `PolicyDefinitions/` | Group Policy templates (English and German) |
+| `gpo-values.txt` | Extension ID and the values to enter in the GPO |
+| `Sync-DwpPolicy.ps1` | Copies the settings from the template's "Global" folder to Chrome and Edge, so they are configured only once |
+
+`key.pem` is created on first use. It defines the extension ID and is needed for every update, so keep it safe and out of the repository.
+
+After packing the `.crx` with that key, check that all files belong to the same extension ID:
+
+```bash
+node scripts/check-ids.js
+```
+
+The step-by-step guide is in German: [docs/enterprise-gpo.md](docs/enterprise-gpo.md).
+
+## Policies
+
+Administrators can set these through the generated templates (see `src/managed_schema.json`). Unset policies leave the choice to the user.
+
+| Policy | Type | Effect |
+| --- | --- | --- |
+| `managedWhitelist` | list of strings | Domains that are always whitelisted |
+| `allowUserWhitelist` | boolean | `false`: users cannot whitelist their own domains |
+| `enablePreemptiveChecks` | boolean | Forces the confirmation page on or off |
+| `enableWarningBar` | boolean | Forces the warning bar on or off |
+| `warningBarSize` | string | Height of the warning bar: `slim` or `normal` |
+| `protectedEmailDomains` | list of strings | Company e-mail domains for the sign-in guard |
+| `protectedLogins` | list of strings | Optional, per user: further sign-in names for the sign-in guard |
+| `noticeText` | string | Note shown on the confirmation page |
+| `enableCountryBlock` | boolean | Forces country checks on or off |
+| `geoProvider` | string | Lookup service: `ipwhois`, `geojs` or `ipapi` |
+| `blockedCountries` | list of strings | ISO country codes whose domains cannot be opened or whitelisted from the confirmation page. Whitelisted domains are not checked; if the lookup fails, the page can still be opened |
+
+## Privacy
+
+- The whitelist, lookalike and sign-in checks run entirely in the browser.
+- Your own whitelist is kept in the browser's sync storage, so it follows your browser profile if sync is turned on.
+- Country checks are the only feature that contacts other servers, and only for **non-whitelisted** domains. By default the domain name is sent to Google Public DNS and the resulting IP address to ipwho.is, both over HTTPS. You can switch to geojs.io (HTTPS) or ip-api.com (plain HTTP) in the popup, or turn country checks off.
+- Check the terms of use of the lookup service before using it commercially.
+
+## Development
+
+```
+src/
+├── manifest.json          # Extension configuration (Chrome, Edge)
+├── manifest.firefox.json  # Extension configuration (Firefox)
+├── managed_schema.json    # Settings administrators can set via policy
+├── _locales/              # Interface texts (en, de)
+├── common.js              # Shared whitelist, settings and lookalike logic
+├── background.js          # Service worker: navigation checks, lookups
+├── content.js             # Warning bar and sign-in guard
+├── confirmation.html/.js  # Confirmation page
+├── styles.css             # Styles for the warning bar and sign-in guard
+├── popup/                 # Settings UI
+└── images/                # Extension icons
+scripts/
+├── build.js               # Builds the packages
+├── enterprise.js          # Creates the rollout files
+├── check-ids.js           # Checks that key, CRX, update.xml and template match
+└── Sync-DwpPolicy.ps1     # Copies the Global GPO settings to Chrome and Edge
+tests/
+├── unit/                  # Logic tests (whitelist, settings, lookalikes)
+└── e2e/                   # Browser tests with the extension loaded
+```
+
+```bash
+git clone https://github.com/Jake-double-one/typosquatting-protect.git
 cd typosquatting-protect
-
-# Build the extension
 node scripts/build.js build
 ```
 
-## 📝 License
+The build writes `dist/chrome-extension.zip` (for Chrome and Edge) and `dist/firefox-extension.zip`.
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+### Tests
 
-## 💡 Contributing
+```bash
+npm test            # logic tests, plain Node.js, no dependencies
+npm install         # once, for the browser tests
+npx playwright install chromium
+npm run test:e2e    # builds the extension and drives it in Chromium
+```
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+The browser tests load the built extension into a headless Chromium and point every hostname at a local test server, so they need no internet access.
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+The tests that cover organization policies write a policy file to `/etc/opt/chrome_for_testing/policies/managed` (Linux only). They are skipped when that directory is not writable:
 
-## 🙏 Acknowledgements
+```bash
+sudo mkdir -p /etc/opt/chrome_for_testing/policies/managed
+sudo chown "$USER" /etc/opt/chrome_for_testing/policies/managed
+```
 
-- Initial release of this extension was made 99% by claude.ai
-- Everyone who has contributed to the project
+## License
 
----
+MIT, see [LICENSE](LICENSE).
 
-<p align="center">
-  Made with ❤️ for a safer browsing experience
-</p>
+## Acknowledgements
+
+Based on [infnada/typosquatting-protect](https://github.com/infnada/typosquatting-protect).

@@ -1,0 +1,293 @@
+{
+  "extDescription": {
+    "message": "Protects against typosquatting and phishing with Geolocation checks by showing warnings for non-whitelisted domains"
+  },
+  "barBefore": {
+    "message": "⚠️ Non-whitelisted domain: "
+  },
+  "barAfter": {
+    "message": " could be insecure"
+  },
+  "barClose": {
+    "message": "Hide for this website"
+  },
+  "confirmPageTitle": {
+    "message": "Domain Safety Check"
+  },
+  "confirmHeading": {
+    "message": "Unknown Website"
+  },
+  "confirmIntro": {
+    "message": "This website has not been approved yet:"
+  },
+  "confirmHint": {
+    "message": "If in doubt, do not enter passwords or personal data."
+  },
+  "confirmWhitelist": {
+    "message": "Whitelist and Continue"
+  },
+  "confirmWildcard": {
+    "message": "Whitelist $1 and Continue"
+  },
+  "confirmContinue": {
+    "message": "Open Once"
+  },
+  "confirmExit": {
+    "message": "Don't Load This Page"
+  },
+  "confirmManaged": {
+    "message": "The whitelist is managed by your organization."
+  },
+  "geoFailed": {
+    "message": "Geolocation lookup failed"
+  },
+  "geoBlockedTitle": {
+    "message": "Blocked Country"
+  },
+  "geoRiskHeading": {
+    "message": "Geographical Risk Warning"
+  },
+  "geoRiskText": {
+    "message": "This domain originates from a blocked country."
+  },
+  "geoHeading": {
+    "message": "Geolocation:"
+  },
+  "geoCountry": {
+    "message": "Country"
+  },
+  "geoRegion": {
+    "message": "Region"
+  },
+  "geoIp": {
+    "message": "IP"
+  },
+  "geoIsp": {
+    "message": "ISP"
+  },
+  "geoRisk": {
+    "message": "Risk Level"
+  },
+  "geoRiskHigh": {
+    "message": "High"
+  },
+  "geoRiskLow": {
+    "message": "Low"
+  },
+  "unknown": {
+    "message": "Unknown"
+  },
+  "tabDomains": {
+    "message": "Domains"
+  },
+  "tabCountry": {
+    "message": "Country Blocking"
+  },
+  "tabImportExport": {
+    "message": "Import/Export"
+  },
+  "tabAbout": {
+    "message": "About"
+  },
+  "preemptiveTitle": {
+    "message": "Preemptive Domain Checks"
+  },
+  "preemptiveText": {
+    "message": "Check domains before loading pages"
+  },
+  "managedByOrg": {
+    "message": "Managed by your organization"
+  },
+  "managedHeading": {
+    "message": "Organization whitelist"
+  },
+  "userLocked": {
+    "message": "Your organization does not allow adding your own domains."
+  },
+  "domainPlaceholder": {
+    "message": "e.g., example.com, *.example.com"
+  },
+  "add": {
+    "message": "Add"
+  },
+  "userHeading": {
+    "message": "Your whitelist"
+  },
+  "emptyWhitelist": {
+    "message": "No domains in whitelist"
+  },
+  "remove": {
+    "message": "Remove"
+  },
+  "badgeWildcard": {
+    "message": "WILDCARD"
+  },
+  "badgeManaged": {
+    "message": "MANAGED"
+  },
+  "alertInvalidDomain": {
+    "message": "This is not a valid domain."
+  },
+  "alertAlreadyListed": {
+    "message": "This domain is already in your whitelist."
+  },
+  "countryHeading": {
+    "message": "Country Blocking"
+  },
+  "countryWarningNote": {
+    "message": "Please note: We have no affiliation or agreement with these services."
+  },
+  "countryToggleTitle": {
+    "message": "Country Checks"
+  },
+  "countryToggleText": {
+    "message": "Turning this off stops all lookup requests"
+  },
+  "countrySelect": {
+    "message": "Select Country to Block"
+  },
+  "countryBlock": {
+    "message": "Block Country"
+  },
+  "emptyCountries": {
+    "message": "No countries blocked"
+  },
+  "exportData": {
+    "message": "Export Data"
+  },
+  "importData": {
+    "message": "Import Data"
+  },
+  "alertImportFormat": {
+    "message": "Invalid format. The imported file must contain a JSON object with 'whitelist' and 'countryBlock' arrays."
+  },
+  "alertImportDone": {
+    "message": "Successfully imported $1 domains and $2 blocked countries."
+  },
+  "alertImportError": {
+    "message": "Error parsing the imported file: $1"
+  },
+  "aboutText": {
+    "message": "A browser extension that helps you manage and protect your browsing experience by allowing you to whitelist domains and block potentially risky content."
+  },
+  "aboutGithub": {
+    "message": "View on GitHub"
+  },
+  "homographTitle": {
+    "message": "Lookalike characters detected"
+  },
+  "homographImitates": {
+    "message": "This address looks like $1, which is on your whitelist, but it is a different domain. It uses characters from another alphabet that look the same."
+  },
+  "homographMixed": {
+    "message": "This domain mixes letters from different alphabets. This is a common phishing trick."
+  },
+  "homographLookalike": {
+    "message": "This domain is written in letters from another alphabet that look like Latin letters."
+  },
+  "homographShownAs": {
+    "message": "Shown as:"
+  },
+  "homographRealName": {
+    "message": "Actual address:"
+  },
+  "barHomographImitates": {
+    "message": " – lookalike of $1!"
+  },
+  "barHomograph": {
+    "message": " – contains lookalike characters!"
+  },
+  "noticeHeading": {
+    "message": "Note from your organization"
+  },
+  "redundantNote": {
+    "message": "Already covered by other entries: $1"
+  },
+  "redundantClean": {
+    "message": "Clean up"
+  },
+  "geoProviderLabel": {
+    "message": "Lookup service"
+  },
+  "geoProviderIpwhois": {
+    "message": "ipwho.is (encrypted)"
+  },
+  "geoProviderIpapi": {
+    "message": "ip-api.com (not encrypted)"
+  },
+  "geoProviderInfo_ipwhois": {
+    "message": "For non-whitelisted domains, the domain name is sent encrypted to Google Public DNS to find its IP address. The IP address is then sent encrypted to ipwho.is."
+  },
+  "geoProviderInfo_ipapi": {
+    "message": "⚠️ For non-whitelisted domains, the domain name is sent to ip-api.com over an unencrypted connection. Anyone on the network can see which domains you open and could alter the answer."
+  },
+  "geoProviderGeojs": {
+    "message": "geojs.io (encrypted)"
+  },
+  "geoProviderInfo_geojs": {
+    "message": "For non-whitelisted domains, the domain name is sent encrypted to Google Public DNS to find its IP address. The IP address is then sent encrypted to geojs.io. For some large hosting networks this service cannot name a country."
+  },
+  "similarTitle": {
+    "message": "Similar to a whitelisted domain"
+  },
+  "similarText": {
+    "message": "This domain resembles $1 from your whitelist, but it is a different domain. Check the spelling carefully before you continue."
+  },
+  "barSimilar": {
+    "message": " – similar to $1!"
+  },
+  "loginWarningTitle": {
+    "message": "⚠️ Warning: company sign-in entered"
+  },
+  "loginWarningText": {
+    "message": "$1 is not on the whitelist. Do not enter your password here unless you are sure this page is genuine."
+  },
+  "suspicionNoWhitelist": {
+    "message": "Because of this suspicion, the domain cannot be whitelisted here."
+  },
+  "confirmSuspicious": {
+    "message": "Caution: $1 looks like $2 from the whitelist, but it is a different domain. Add it anyway?"
+  },
+  "warningBarTitle": {
+    "message": "Warning Bar"
+  },
+  "warningBarText": {
+    "message": "Show a red bar on non-whitelisted pages"
+  },
+  "warningBarSizeLabel": {
+    "message": "Height:"
+  },
+  "warningBarSizeSlim": {
+    "message": "Slim"
+  },
+  "warningBarSizeNormal": {
+    "message": "Normal"
+  },
+  "barHint": {
+    "message": "Whitelist it from the extension icon"
+  },
+  "currentPage": {
+    "message": "Current page"
+  },
+  "releaseExact": {
+    "message": "Whitelist only $1"
+  },
+  "releaseWildcard": {
+    "message": "Whitelist $1"
+  },
+  "currentWhitelisted": {
+    "message": "✓ Whitelisted (your whitelist)"
+  },
+  "currentManaged": {
+    "message": "✓ Whitelisted (organization whitelist)"
+  },
+  "currentSuspicious": {
+    "message": "Looks like $1 – do not whitelist"
+  },
+  "optionsHeading": {
+    "message": "Options"
+  },
+  "alertSuffixWildcard": {
+    "message": "This wildcard would whitelist a whole domain ending (for example *.co.uk). Please enter a specific domain."
+  }
+}

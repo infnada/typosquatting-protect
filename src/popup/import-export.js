@@ -1,6 +1,6 @@
 async function exportData() {
-  const resultWhiteList = await browserAPI.storage.sync.get(["whitelist"]);
-  const whitelist = resultWhiteList.whitelist || [];
+  // Only the user's own entries; the organization list lives in the policy
+  const whitelist = await getUserWhitelist();
   const resultCountryBlock = await browserAPI.storage.sync.get([
     "blockedCountries",
   ]);
@@ -16,6 +16,23 @@ async function exportData() {
     "whitelist_domains_" + new Date().toISOString().split("T")[0] + ".json",
   );
   exportLink.click();
+}
+
+// Returns false if the entry looks like a trusted domain and the user does not
+// confirm it. If the check itself fails, the entry is not imported.
+async function confirmImportedEntry(entry) {
+  let suspicion;
+  try {
+    const info = await browserAPI.runtime.sendMessage({
+      action: "domainInfo",
+      hostname: entry.replace(/^\*\./, ""),
+    });
+    if (!info || (entry.startsWith("*.") && info.suffixWildcard)) return false;
+    suspicion = info.suspicion;
+  } catch (e) {
+    return false;
+  }
+  return !suspicion || confirm(t("confirmSuspicious", [entry, suspicion]));
 }
 
 function importData(event) {
@@ -37,26 +54,24 @@ function importData(event) {
         !Array.isArray(importedData.whitelist) ||
         !Array.isArray(importedData.countryBlock)
       ) {
-        alert(
-          "Invalid format. The imported file must contain a JSON object with 'whitelist' and 'countryBlock' arrays.",
-        );
+        alert(t("alertImportFormat"));
         return;
       }
 
-      const result = await browserAPI.storage.sync.get([
-        "whitelist",
-        "blockedCountries",
-      ]);
+      const result = await browserAPI.storage.sync.get(["blockedCountries"]);
 
-      let whitelist = result.whitelist || [];
+      let whitelist = await getUserWhitelist();
       let countryBlock = result.blockedCountries || [];
 
-      // Add unique domains from imported whitelist
-      importedData.whitelist.forEach(function (domain) {
-        if (typeof domain === "string" && !whitelist.includes(domain)) {
-          whitelist.push(domain);
-        }
-      });
+      // Imported entries get the same lookalike check as entries added by
+      // hand: an entry that resembles a trusted domain needs confirmation.
+      const accepted = [];
+      for (const raw of importedData.whitelist) {
+        const entry = normalizeEntry(raw);
+        if (!entry || whitelist.includes(entry) || accepted.includes(entry)) continue;
+        if (await confirmImportedEntry(entry)) accepted.push(entry);
+      }
+      whitelist = normalizeList([...whitelist, ...accepted]);
 
       // Add unique countries from imported countryBlock
       importedData.countryBlock.forEach(function (country) {
@@ -65,19 +80,20 @@ function importData(event) {
         }
       });
 
-      await browserAPI.storage.sync.set({
-        whitelist: whitelist,
-        blockedCountries: countryBlock,
-      });
+      await setUserWhitelist(whitelist);
+      await browserAPI.storage.sync.set({ blockedCountries: countryBlock });
 
       loadWhitelist();
       loadBlockedCountries();
 
       alert(
-        `Successfully imported ${importedData.whitelist.length} domains and ${importedData.countryBlock.length} blocked countries.`,
+        t("alertImportDone", [
+          String(accepted.length),
+          String(importedData.countryBlock.length),
+        ]),
       );
     } catch (error) {
-      alert("Error parsing the imported file: " + error.message);
+      alert(t("alertImportError", [error.message]));
     }
   };
 

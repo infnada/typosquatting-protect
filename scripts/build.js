@@ -1,201 +1,115 @@
 const fs = require("fs");
 const path = require("path");
 const { execSync } = require("child_process");
-// Configuration
-const SOURCE_DIR = "./src";
-const DIST_DIR = "./dist";
+
+const ROOT_DIR = path.join(__dirname, "..");
+const SOURCE_DIR = path.join(ROOT_DIR, "src");
+const DIST_DIR = path.join(ROOT_DIR, "dist");
+// The Chromium package is used for both Google Chrome and Microsoft Edge.
 const CHROME_DIR = path.join(DIST_DIR, "chrome");
 const FIREFOX_DIR = path.join(DIST_DIR, "firefox");
-// Create distribution directories
-function createDirectories() {
-  if (!fs.existsSync(DIST_DIR)) {
-    fs.mkdirSync(DIST_DIR);
+
+const SHARED_FILES = [
+  "common.js",
+  "background.js",
+  "content.js",
+  "styles.css",
+  "confirmation.html",
+  "confirmation.js",
+];
+const SHARED_DIRECTORIES = ["images", "popup", "_locales"];
+const CHROME_ONLY_FILES = ["managed_schema.json"];
+
+const REQUIRED_FILES = [
+  "manifest.json",
+  "manifest.firefox.json",
+  "popup/popup.html",
+  "popup/popup.js",
+  "_locales/en/messages.json",
+  "_locales/de/messages.json",
+  ...SHARED_FILES,
+  ...CHROME_ONLY_FILES,
+];
+
+function copyInto(targetDir, manifestName, extraFiles) {
+  fs.mkdirSync(targetDir, { recursive: true });
+  for (const file of [...SHARED_FILES, ...extraFiles]) {
+    fs.copyFileSync(path.join(SOURCE_DIR, file), path.join(targetDir, file));
   }
-  if (!fs.existsSync(CHROME_DIR)) {
-    fs.mkdirSync(CHROME_DIR);
-  }
-  if (!fs.existsSync(FIREFOX_DIR)) {
-    fs.mkdirSync(FIREFOX_DIR);
-  }
-}
-// Copy shared files
-function copySharedFiles() {
-  const filesToCopy = [
-    "content.js",
-    "styles.css",
-    "confirmation.html",
-    "confirmation.js",
-  ];
-  const directoriesToCopy = ["images", "popup"];
-  // Copy individual files
-  filesToCopy.forEach((file) => {
-    const sourcePath = path.join(SOURCE_DIR, file);
-    const chromeDestPath = path.join(CHROME_DIR, file);
-    const firefoxDestPath = path.join(FIREFOX_DIR, file);
-
-    fs.copyFileSync(sourcePath, chromeDestPath);
-    fs.copyFileSync(sourcePath, firefoxDestPath);
-  });
-  // Copy directories
-  directoriesToCopy.forEach((dir) => {
-    const sourceDir = path.join(SOURCE_DIR, dir);
-    const chromeDestDir = path.join(CHROME_DIR, dir);
-    const firefoxDestDir = path.join(FIREFOX_DIR, dir);
-
-    // Create destination directories if they don't exist
-    if (!fs.existsSync(chromeDestDir)) {
-      fs.mkdirSync(chromeDestDir);
-    }
-    if (!fs.existsSync(firefoxDestDir)) {
-      fs.mkdirSync(firefoxDestDir);
-    }
-
-    // Copy all files from the directory
-    const files = fs.readdirSync(sourceDir);
-    files.forEach((file) => {
-      const sourcePath = path.join(sourceDir, file);
-      const chromeDestPath = path.join(chromeDestDir, file);
-      const firefoxDestPath = path.join(firefoxDestDir, file);
-
-      fs.copyFileSync(sourcePath, chromeDestPath);
-      fs.copyFileSync(sourcePath, firefoxDestPath);
+  for (const dir of SHARED_DIRECTORIES) {
+    fs.cpSync(path.join(SOURCE_DIR, dir), path.join(targetDir, dir), {
+      recursive: true,
     });
-  });
-}
-// Copy browser-specific files
-function copyBrowserSpecificFiles() {
-  // Copy Chrome manifest
+  }
   fs.copyFileSync(
-    path.join(SOURCE_DIR, "manifest.json"),
-    path.join(CHROME_DIR, "manifest.json"),
-  );
-
-  // Copy Firefox manifest
-  fs.copyFileSync(
-    path.join(SOURCE_DIR, "manifest.firefox.json"),
-    path.join(FIREFOX_DIR, "manifest.json"),
-  );
-
-  // Copy browser-polyfill.js to Firefox directory
-  fs.copyFileSync(
-    path.join(SOURCE_DIR, "browser-polyfill.js"),
-    path.join(FIREFOX_DIR, "browser-polyfill.js"),
-  );
-
-  // Copy background script to Chrome directory
-  fs.copyFileSync(
-    path.join(SOURCE_DIR, "background.js"),
-    path.join(CHROME_DIR, "background.js"),
-  );
-
-  // For Firefox, use the cross-browser background script
-  fs.copyFileSync(
-    path.join(SOURCE_DIR, "background.js"),
-    path.join(FIREFOX_DIR, "background.js"),
-  );
-}
-// Create ZIP archives for distribution
-function createZipArchives() {
-  const chromeZipCommand = `cd ${CHROME_DIR} && zip -r ../chrome-extension.zip *`;
-  const firefoxZipCommand = `cd ${FIREFOX_DIR} && zip -r ../firefox-extension.zip *`;
-
-  console.log("Creating Chrome extension ZIP...");
-  execSync(chromeZipCommand);
-
-  console.log("Creating Firefox extension ZIP...");
-  execSync(firefoxZipCommand);
-}
-// Main build function
-function build() {
-  console.log("Building extensions for Chrome and Firefox...");
-
-  console.log("Creating directories...");
-  createDirectories();
-
-  console.log("Copying shared files...");
-  copySharedFiles();
-
-  console.log("Copying browser-specific files...");
-  copyBrowserSpecificFiles();
-
-  console.log("Creating ZIP archives...");
-  createZipArchives();
-
-  console.log("Build complete!");
-  console.log(
-    `Chrome extension: ${path.join(DIST_DIR, "chrome-extension.zip")}`,
-  );
-  console.log(
-    `Firefox extension: ${path.join(DIST_DIR, "firefox-extension.zip")}`,
+    path.join(SOURCE_DIR, manifestName),
+    path.join(targetDir, "manifest.json"),
   );
 }
 
-// Function to clean up previous builds
+function zip(sourceDir, zipName) {
+  execSync(`zip -r ../${zipName} .`, { cwd: sourceDir, stdio: "ignore" });
+}
+
 function clean() {
   console.log("Cleaning previous builds...");
-
-  if (fs.existsSync(DIST_DIR)) {
-    // Remove all files in the dist directory
-    const files = fs.readdirSync(DIST_DIR);
-    files.forEach((file) => {
-      const filePath = path.join(DIST_DIR, file);
-      if (fs.lstatSync(filePath).isDirectory()) {
-        // Remove all files in subdirectories
-        const subFiles = fs.readdirSync(filePath);
-        subFiles.forEach((subFile) => {
-          fs.unlinkSync(path.join(filePath, subFile));
-        });
-        fs.rmdirSync(filePath);
-      } else {
-        fs.unlinkSync(filePath);
-      }
-    });
-  }
-
+  fs.rmSync(DIST_DIR, { recursive: true, force: true });
   console.log("Clean complete!");
 }
 
-// Function to validate source files exist
 function validateSource() {
   console.log("Validating source files...");
 
-  const requiredFiles = [
-    "manifest.json",
-    "manifest.firefox.json",
-    "popup/popup.html",
-    "popup/popup.js",
-    "content.js",
-    "styles.css",
-    "background.js",
-    "browser-polyfill.js",
-  ];
+  const missing = REQUIRED_FILES.filter(
+    (file) => !fs.existsSync(path.join(SOURCE_DIR, file)),
+  );
+  missing.forEach((file) =>
+    console.error(`ERROR: Required file not found: src/${file}`),
+  );
 
-  let missing = false;
-
-  requiredFiles.forEach((file) => {
-    const filePath = path.join(SOURCE_DIR, file);
-    if (!fs.existsSync(filePath)) {
-      console.error(`ERROR: Required file not found: ${filePath}`);
-      missing = true;
+  for (const manifest of ["manifest.json", "manifest.firefox.json"]) {
+    if (missing.includes(manifest)) continue;
+    try {
+      JSON.parse(fs.readFileSync(path.join(SOURCE_DIR, manifest), "utf8"));
+    } catch (error) {
+      console.error(`ERROR: src/${manifest} is not valid JSON: ${error.message}`);
+      missing.push(manifest);
     }
-  });
+  }
 
-  if (missing) {
-    console.error(
-      "Validation failed. Please ensure all required files exist in the source directory.",
-    );
+  if (missing.length) {
+    console.error("Validation failed.");
     process.exit(1);
   }
 
   console.log("Source validation complete!");
-  return true;
 }
 
-// Command line argument handling
-function main() {
-  const arg = process.argv[2];
+// Copies the unpacked extensions to dist/chrome and dist/firefox.
+function buildDirectories() {
+  fs.rmSync(CHROME_DIR, { recursive: true, force: true });
+  fs.rmSync(FIREFOX_DIR, { recursive: true, force: true });
+  copyInto(CHROME_DIR, "manifest.json", CHROME_ONLY_FILES);
+  copyInto(FIREFOX_DIR, "manifest.firefox.json", []);
+}
 
-  switch (arg) {
+function build() {
+  console.log("Building extensions for Chrome/Edge and Firefox...");
+  buildDirectories();
+
+  console.log("Creating ZIP archives...");
+  fs.rmSync(path.join(DIST_DIR, "chrome-extension.zip"), { force: true });
+  fs.rmSync(path.join(DIST_DIR, "firefox-extension.zip"), { force: true });
+  zip(CHROME_DIR, "chrome-extension.zip");
+  zip(FIREFOX_DIR, "firefox-extension.zip");
+
+  console.log("Build complete!");
+  console.log("Chrome/Edge extension: dist/chrome-extension.zip");
+  console.log("Firefox extension: dist/firefox-extension.zip");
+}
+
+function main() {
+  switch (process.argv[2]) {
     case "clean":
       clean();
       break;
@@ -210,10 +124,13 @@ function main() {
       console.log("Usage: node build.js [clean|validate|build]");
       console.log("  clean     - Remove previous builds");
       console.log("  validate  - Check that all required source files exist");
-      console.log("  build     - Build extensions for Chrome and Firefox");
+      console.log("  build     - Build extensions for Chrome/Edge and Firefox");
       break;
   }
 }
 
-// Execute main function
-main();
+if (require.main === module) {
+  main();
+}
+
+module.exports = { validateSource, buildDirectories, CHROME_DIR, DIST_DIR };

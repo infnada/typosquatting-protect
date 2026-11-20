@@ -1,8 +1,9 @@
 <!doctype html>
 <html>
   <head>
-    <title>Domain Safety Check</title>
+    <title data-i18n="confirmPageTitle">Domain Safety Check</title>
     <meta charset="UTF-8" />
+    <meta name="color-scheme" content="light dark" />
     <style>
       body {
         font-family:
@@ -11,8 +12,10 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        height: 100vh;
+        min-height: 100vh;
         margin: 0;
+        padding: 20px 0;
+        box-sizing: border-box;
         background-color: #f8f9fa;
       }
       .container {
@@ -55,6 +58,10 @@
         font-size: 14px;
         transition: background-color 0.2s;
       }
+      button:disabled {
+        opacity: 0.5;
+        cursor: wait;
+      }
       .continue-whitelist {
         background-color: #4caf50;
         color: white;
@@ -83,6 +90,55 @@
       .exit:hover {
         background-color: #d32f2f;
       }
+      .homograph-warning {
+        border: 2px solid #d32f2f;
+        background-color: #fdecea;
+        color: #7f1d1d;
+        padding: 12px 15px;
+        border-radius: 5px;
+        margin: 15px 0;
+        text-align: left;
+        overflow-wrap: anywhere;
+      }
+      .homograph-warning p {
+        margin: 6px 0 0;
+      }
+      .similar-warning {
+        border: 2px solid #f9a825;
+        background-color: #fff8e1;
+        color: #5d4037;
+        padding: 12px 15px;
+        border-radius: 5px;
+        margin: 15px 0;
+        text-align: left;
+        overflow-wrap: anywhere;
+      }
+      .similar-warning p {
+        margin: 6px 0 0;
+      }
+      .org-notice {
+        border-left: 4px solid #4285f4;
+        background-color: #eef4fe;
+        padding: 10px 15px;
+        border-radius: 4px;
+        margin: 15px 0;
+        text-align: left;
+        white-space: pre-line;
+      }
+      .org-notice strong {
+        display: block;
+        margin-bottom: 4px;
+      }
+      [hidden] {
+        display: none !important;
+      }
+      .managed-note {
+        color: #777;
+        font-size: 12px;
+      }
+      .security-details:empty {
+        display: none;
+      }
       .security-details {
         background-color: #f1f1f1;
         padding: 15px;
@@ -90,31 +146,127 @@
         margin: 15px 0;
         text-align: left;
       }
+      /* Dark mode: follows the browser or system setting */
+      @media (prefers-color-scheme: dark) {
+        body {
+          background-color: #1e1f22;
+          color: #e3e5e8;
+        }
+        .container {
+          background-color: #2b2d31;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        }
+        h2,
+        .warning-icon {
+          color: #ff6b6b;
+        }
+        .domain {
+          background-color: #1e1f22;
+        }
+        .security-details {
+          background-color: #232428;
+        }
+        .homograph-warning {
+          background-color: #3b1d1f;
+          border-color: #e05252;
+          color: #ffc9c9;
+        }
+        .similar-warning {
+          background-color: #3a3320;
+          border-color: #c99a1e;
+          color: #f0e2b0;
+        }
+        .org-notice {
+          background-color: #1f2c44;
+          border-left-color: #5b8def;
+        }
+        .managed-note {
+          color: #a0a4ab;
+        }
+        .continue-whitelist {
+          background-color: #2e7d32;
+        }
+        .continue-whitelist:hover {
+          background-color: #388e3c;
+        }
+        .continue-wildcard {
+          background-color: #3b6fd4;
+        }
+        .continue-wildcard:hover {
+          background-color: #4a7de0;
+        }
+        .continue-only {
+          background-color: #c79100;
+          color: #1e1f22;
+        }
+        .continue-only:hover {
+          background-color: #d9a100;
+        }
+        .exit {
+          background-color: #c62828;
+        }
+        .exit:hover {
+          background-color: #d73a3a;
+        }
+      }
     </style>
   </head>
   <body>
     <div class="container">
       <div class="warning-icon" id="icon">&#9888;&#65039;</div>
-      <h2 id="title">Non-Whitelisted Domain</h2>
-      <p>You are about to visit a domain that is not in your whitelist:</p>
+      <h2 id="title" data-i18n="confirmHeading">Unknown Website</h2>
+      <p data-i18n="confirmIntro">
+        This website has not been approved yet:
+      </p>
       <div class="domain" id="domain-name"></div>
-      <p>This could potentially be a typosquatting or phishing attempt.</p>
+      <p data-i18n="confirmHint">
+        If in doubt, do not enter passwords or personal data.
+      </p>
+      <div class="homograph-warning" id="homograph-warning" hidden></div>
+      <div class="similar-warning" id="similar-warning" hidden></div>
       <div class="security-details" id="security-details"></div>
+      <div class="org-notice" id="org-notice" hidden></div>
       <div class="buttons">
-        <button class="continue-whitelist" id="whitelist-continue">
+        <button
+          class="continue-only"
+          id="just-continue"
+          data-i18n="confirmContinue"
+        >
+          Open Once
+        </button>
+        <button
+          class="continue-whitelist"
+          id="whitelist-continue"
+          data-i18n="confirmWhitelist"
+        >
           Whitelist and Continue
         </button>
         <button class="continue-wildcard" id="wildcard-continue">
           Whitelist with Wildcard and Continue
         </button>
-        <button class="continue-only" id="just-continue">
-          Continue Without Whitelisting
+        <button class="exit" id="exit-page" data-i18n="confirmExit">
+          Don't Load This Page
         </button>
-        <button class="exit" id="exit-page">Don't Load This Page</button>
       </div>
+      <p
+        class="managed-note"
+        id="suspicion-note"
+        data-i18n="suspicionNoWhitelist"
+        hidden
+      >
+        Because of this suspicion, the domain cannot be whitelisted here.
+      </p>
+      <p
+        class="managed-note"
+        id="managed-note"
+        data-i18n="confirmManaged"
+        hidden
+      >
+        The whitelist is managed by your organization.
+      </p>
     </div>
 
-    <script src="browser-polyfill.js"></script>
+    <script src="common.js"></script>
     <script src="confirmation.js"></script>
   </body>
 </html>

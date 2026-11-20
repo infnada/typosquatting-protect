@@ -1,0 +1,14 @@
+{
+  "name": "domain-whitelist-protector",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "build": "node scripts/build.js build",
+    "test": "node --test \"tests/unit/*.test.js\"",
+    "test:e2e": "node scripts/build.js build && node --test --test-concurrency=1 \"tests/e2e/*.test.js\"",
+    "test:all": "npm test && npm run test:e2e"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0"
+  }
+}

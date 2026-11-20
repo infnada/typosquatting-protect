@@ -2,6 +2,8 @@
 <html>
   <head>
     <title>Domain Whitelist Protector</title>
+    <meta charset="UTF-8" />
+    <meta name="color-scheme" content="light dark" />
     <style>
       body {
         width: 400px;
@@ -82,20 +84,24 @@
         overflow-y: auto;
         border: 1px solid #eee;
         border-radius: 4px;
-        margin-top: 15px;
+        margin-top: 8px;
       }
       li {
-        padding: 10px;
+        padding: 3px 8px;
         border-bottom: 1px solid #eee;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        font-size: 13px;
+        gap: 8px;
+        font-size: 12px;
+        line-height: 1.3;
       }
       li .domain-entry {
         display: flex;
         align-items: center;
         gap: 5px;
+        min-width: 0;
+        overflow-wrap: anywhere;
       }
       li .wildcard-badge {
         background-color: #4285f4;
@@ -111,7 +117,10 @@
       }
       .remove-btn {
         background-color: #dc3545;
-        padding: 3px 8px;
+        padding: 1px 6px;
+        margin-left: 0;
+        font-size: 11px;
+        flex-shrink: 0;
       }
       .empty-list {
         padding: 15px;
@@ -121,8 +130,8 @@
       .toggle-container {
         display: flex;
         align-items: center;
-        margin: 15px 0;
-        padding: 10px;
+        margin: 8px 0;
+        padding: 8px 10px;
         background-color: #f8f9fa;
         border-radius: 4px;
         border: 1px solid #eee;
@@ -136,6 +145,8 @@
       .toggle {
         position: relative;
         display: inline-block;
+        flex-shrink: 0;
+        margin-left: 10px;
         width: 50px;
         height: 24px;
       }
@@ -215,11 +226,207 @@
       .github-link:hover {
         background-color: #3367d6;
       }
+      .bar-size-row {
+        margin-top: 4px;
+      }
+      .bar-size-row select {
+        font-size: 12px;
+        padding: 1px 4px;
+      }
+      .managed-badge {
+        background-color: #6c757d;
+        color: white;
+        padding: 2px 6px;
+        border-radius: 10px;
+        font-size: 10px;
+        font-weight: bold;
+      }
+      .redundant-note {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        font-size: 12px;
+        background-color: #fff8e1;
+        border: 1px solid #ffe082;
+        border-radius: 4px;
+        padding: 5px 8px;
+        margin-top: 8px;
+      }
+      .redundant-note button {
+        padding: 3px 10px;
+        margin-left: 0;
+        font-size: 12px;
+        flex-shrink: 0;
+      }
+      .managed-note {
+        color: #777;
+        font-size: 12px;
+        margin: 10px 0;
+      }
+      .toggle input:disabled + .slider {
+        cursor: not-allowed;
+        opacity: 0.6;
+      }
+      [hidden] {
+        display: none !important;
+      }
+      .current-page {
+        border: 1px solid #4caf50;
+        border-radius: 6px;
+        padding: 10px;
+        margin-bottom: 12px;
+      }
+      .current-page.suspicious {
+        border-color: #d50000;
+      }
+      .current-label {
+        font-size: 12px;
+        opacity: 0.7;
+      }
+      .current-domain {
+        font-weight: bold;
+        font-size: 15px;
+        margin: 2px 0 8px;
+        word-break: break-all;
+      }
+      .current-status {
+        font-size: 13px;
+      }
+      .current-page.suspicious .current-status {
+        color: #d50000;
+        font-weight: bold;
+      }
+      .current-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .current-buttons:empty {
+        display: none;
+      }
+      .current-buttons button {
+        box-sizing: border-box;
+        width: 100%;
+        margin: 0;
+        padding: 8px;
+        border: none;
+        border-radius: 4px;
+        font-weight: bold;
+        color: #fff;
+        cursor: pointer;
+      }
+      #release-exact {
+        background-color: #4caf50;
+      }
+      #release-exact:hover {
+        background-color: #3d8b40;
+      }
+      #release-wildcard {
+        background-color: #4285f4;
+      }
+      #release-wildcard:hover {
+        background-color: #3367d6;
+      }
+      .section-title-with-note {
+        margin-bottom: 0;
+        border-bottom: none;
+        padding-bottom: 0;
+      }
+      .section-note {
+        margin: 2px 0 8px;
+        padding-bottom: 6px;
+        border-bottom: 1px solid rgba(128, 128, 128, 0.3);
+      }
+      #geo-provider {
+        width: 100%;
+        padding: 5px;
+        margin-top: 4px;
+      }
+      .warning p {
+        margin: 8px 0 0;
+      }
       .warning {
         border: 1px solid #eee;
         border-radius: 4px;
         padding: 10px;
         font-size: 12px;
+      }
+      /* Dark mode: follows the browser or system setting */
+      @media (prefers-color-scheme: dark) {
+        body {
+          background-color: #1e1f22;
+          color: #e3e5e8;
+        }
+        h2 {
+          color: #e3e5e8;
+        }
+        .tab-container,
+        .section-title {
+          border-bottom-color: #3f4147;
+        }
+        .tab {
+          background-color: #2b2d31;
+          border-color: #3f4147;
+          color: #a0a4ab;
+        }
+        .tab.active {
+          background-color: #1e1f22;
+          border-color: #3f4147;
+          border-bottom-color: #1e1f22;
+          color: #e3e5e8;
+        }
+        #new-domain,
+        select {
+          background-color: #2b2d31;
+          border: 1px solid #3f4147;
+          color: #e3e5e8;
+        }
+        #new-domain::placeholder {
+          color: #80848e;
+        }
+        ul,
+        .warning {
+          border-color: #3f4147;
+        }
+        li {
+          border-bottom-color: #3f4147;
+        }
+        .empty-list,
+        .managed-note {
+          color: #a0a4ab;
+        }
+        .toggle-container {
+          background-color: #2b2d31;
+          border-color: #3f4147;
+        }
+        .slider {
+          background-color: #5c5f66;
+        }
+        .managed-badge {
+          background-color: #5c5f66;
+        }
+        .redundant-note {
+          background-color: #3a3320;
+          border-color: #6b5a1e;
+          color: #f0e2b0;
+        }
+        button,
+        .github-link,
+        input:checked + .slider,
+        li .wildcard-badge {
+          background-color: #3b6fd4;
+        }
+        button:hover,
+        .github-link:hover {
+          background-color: #4a7de0;
+        }
+        .remove-btn {
+          background-color: #b3323f;
+        }
+        .remove-btn:hover {
+          background-color: #c7404d;
+        }
       }
     </style>
   </head>
@@ -227,17 +434,61 @@
     <h2>Domain Whitelist Protector</h2>
 
     <div class="tab-container">
-      <div class="tab active" data-tab="domains">Domains</div>
-      <div class="tab" data-tab="country">Country Blocking</div>
-      <div class="tab" data-tab="import-export">Import/Export</div>
-      <div class="tab" data-tab="about">About</div>
+      <div class="tab active" data-tab="domains" data-i18n="tabDomains">
+        Domains
+      </div>
+      <div class="tab" data-tab="country" data-i18n="tabCountry">
+        Country Blocking
+      </div>
+      <div class="tab" data-tab="import-export" data-i18n="tabImportExport">
+        Import/Export
+      </div>
+      <div class="tab" data-tab="about" data-i18n="tabAbout">About</div>
     </div>
 
     <div id="domains" class="tab-content active">
-      <div class="toggle-container">
+      <div id="current-page" class="current-page" hidden>
+        <div class="current-label" data-i18n="currentPage">Current page</div>
+        <div class="current-domain" id="current-domain"></div>
+        <div class="current-status" id="current-status" hidden></div>
+        <div class="current-buttons" id="current-buttons"></div>
+      </div>
+
+      <p
+        class="managed-note"
+        id="user-whitelist-locked"
+        data-i18n="userLocked"
+        hidden
+      >
+        Your organization does not allow adding your own domains.
+      </p>
+      <div id="user-section">
+        <div class="container">
+          <input
+            type="text"
+            id="new-domain"
+            placeholder="e.g., example.com, *.example.com"
+            data-i18n-placeholder="domainPlaceholder"
+          />
+          <button id="add-domain" data-i18n="add">Add</button>
+        </div>
+        <h3 class="section-title" data-i18n="userHeading">Your whitelist</h3>
+        <div class="redundant-note" id="redundant-note" hidden>
+          <span id="redundant-text"></span>
+          <button id="redundant-clean" data-i18n="redundantClean">
+            Clean up
+          </button>
+        </div>
+        <ul id="whitelist"></ul>
+      </div>
+
+      <h3 class="section-title" id="options-heading" data-i18n="optionsHeading">Options</h3>
+      <div class="toggle-container" id="preemptive-box">
         <div class="toggle-label">
-          <strong>Preemptive Domain Checks</strong>
-          <div>Check domains before loading pages</div>
+          <strong data-i18n="preemptiveTitle">Preemptive Domain Checks</strong>
+          <div data-i18n="preemptiveText">
+            Check domains before loading pages
+          </div>
         </div>
         <label class="toggle">
           <input type="checkbox" id="preemptive-check-toggle" checked />
@@ -245,50 +496,70 @@
         </label>
       </div>
 
-      <div class="container">
-        <input
-          type="text"
-          id="new-domain"
-          placeholder="e.g., example.com, *.example.com"
-        />
-        <button id="add-domain">Add</button>
+      <div class="toggle-container" id="warning-bar-box">
+        <div class="toggle-label">
+          <strong data-i18n="warningBarTitle">Warning Bar</strong>
+          <div data-i18n="warningBarText">
+            Show a red bar on non-whitelisted pages
+          </div>
+          <div class="bar-size-row" id="warning-bar-size-row">
+            <label for="warning-bar-size" data-i18n="warningBarSizeLabel">
+              Height:
+            </label>
+            <select id="warning-bar-size">
+              <option value="slim" data-i18n="warningBarSizeSlim">Slim</option>
+              <option value="normal" data-i18n="warningBarSizeNormal">
+                Normal
+              </option>
+            </select>
+          </div>
+        </div>
+        <label class="toggle" id="warning-bar-switch">
+          <input type="checkbox" id="warning-bar-toggle" checked />
+          <span class="slider"></span>
+        </label>
       </div>
-
-      <div class="container">
-        <button id="add-current" class="full-width-btn">
-          Add Current Domain
-        </button>
+      <div id="managed-section" hidden>
+        <h3 class="section-title section-title-with-note" data-i18n="managedHeading">
+          Organization whitelist
+        </h3>
+        <div class="managed-note section-note" data-i18n="managedByOrg">
+          Managed by your organization
+        </div>
+        <ul id="managed-whitelist"></ul>
       </div>
-
-      <h3 class="section-title">Whitelisted Domains:</h3>
-      <ul id="whitelist"></ul>
     </div>
 
     <div id="country" class="tab-content">
-      <h3 class="section-title">Country Blocking</h3>
+      <h3 class="section-title" data-i18n="countryHeading">Country Blocking</h3>
       <div class="warning">
-        <div class="warning-icon">
-          &#9888;&#65039; Currently, this extension uses a plain HTTP request to
-          ip-api.com to retrieve geographical data for the
-          <strong>non whitelisted</strong> domains you access. This approach
-          presents potential security and privacy risks:
+        <div id="geo-provider-row">
+        <label for="geo-provider" data-i18n="geoProviderLabel">
+          Lookup service
+        </label>
+        <select id="geo-provider">
+          <option value="ipwhois" data-i18n="geoProviderIpwhois">
+            ipwho.is (encrypted)
+          </option>
+          <option value="geojs" data-i18n="geoProviderGeojs">
+            geojs.io (encrypted)
+          </option>
+          <option value="ipapi" data-i18n="geoProviderIpapi">
+            ip-api.com (not encrypted)
+          </option>
+        </select>
         </div>
-        <ul>
-          <li>
-            Network interceptors could potentially view the domains you are
-            accessing
-          </li>
-          <li>
-            The ip-api.com service provider might track domain requests based on
-            source IP address
-          </li>
-        </ul>
-        <p>Please note: We have no affiliation or agreement with ip-api.com.</p>
+        <p id="geo-provider-info"></p>
+        <p data-i18n="countryWarningNote">
+          Please note: We have no affiliation or agreement with these services.
+        </p>
       </div>
-      <div class="toggle-container">
+      <div class="toggle-container" id="country-box">
         <div class="toggle-label">
-          <strong>Disable Country Checks</strong>
-          <div>This will stop requests to ip-api.com</div>
+          <strong data-i18n="countryToggleTitle">Country Checks</strong>
+          <div data-i18n="countryToggleText">
+            Turning this off stops all lookup requests
+          </div>
         </div>
         <label class="toggle">
           <input type="checkbox" id="country-block-toggle" checked />
@@ -297,39 +568,48 @@
       </div>
       <div class="container">
         <select id="country-select">
-          <option value="">Select Country to Block</option>
+          <option value="" data-i18n="countrySelect">
+            Select Country to Block
+          </option>
         </select>
-        <button id="block-country">Block Country</button>
+        <button id="block-country" data-i18n="countryBlock">
+          Block Country
+        </button>
       </div>
       <ul id="blocked-countries"></ul>
     </div>
 
     <div id="import-export" class="tab-content">
-      <h3 class="section-title">Import/Export</h3>
-      <button id="export-data" class="full-width-btn">Export Data</button>
-      <button id="import-data" class="full-width-btn">Import Data</button>
+      <h3 class="section-title" data-i18n="tabImportExport">Import/Export</h3>
+      <button id="export-data" class="full-width-btn" data-i18n="exportData">
+        Export Data
+      </button>
+      <button id="import-data" class="full-width-btn" data-i18n="importData">
+        Import Data
+      </button>
       <input type="file" id="import-file" style="display: none" />
     </div>
 
     <div id="about" class="tab-content">
       <div class="about-content">
         <h3>Domain Whitelist Protector</h3>
-        <p>
+        <p data-i18n="aboutText">
           A browser extension that helps you manage and protect your browsing
           experience by allowing you to whitelist domains and block potentially
           risky content.
         </p>
         <a
-          href="https://github.com/infnada/typosquatting-protect"
+          href="https://github.com/Jake-double-one/typosquatting-protect"
           class="github-link"
           target="_blank"
+          data-i18n="aboutGithub"
         >
           View on GitHub
         </a>
       </div>
     </div>
 
-    <script src="browser-polyfill.js"></script>
+    <script src="../common.js"></script>
     <script src="popup.js"></script>
     <script src="whitelist.js"></script>
     <script src="import-export.js"></script>

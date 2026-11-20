@@ -1,0 +1,81 @@
+{
+  "type": "object",
+  "properties": {
+    "managedWhitelist": {
+      "title": "Organization whitelist",
+      "description": "Domains that are always whitelisted, e.g. \"example.com\" or \"*.sharepoint.com\". Users cannot remove them.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "allowUserWhitelist": {
+      "title": "Allow users to whitelist their own domains",
+      "description": "If false, only the organization whitelist applies and users cannot add domains. Default: true.",
+      "type": "boolean"
+    },
+    "enablePreemptiveChecks": {
+      "title": "Preemptive domain checks",
+      "description": "Forces the confirmation page for non-whitelisted domains on or off. If unset, users decide.",
+      "type": "boolean"
+    },
+    "enableCountryBlock": {
+      "title": "Country checks",
+      "description": "Forces the country lookup on or off. If unset, users decide.",
+      "type": "boolean"
+    },
+    "blockedCountries": {
+      "title": "Blocked countries",
+      "description": "ISO 3166-1 alpha-2 country codes (e.g. \"RU\") that are always blocked.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "noticeText": {
+      "title": "Note on the confirmation page",
+      "description": "Text shown to users on the confirmation page, e.g. whom to contact when in doubt.",
+      "type": "string"
+    },
+    "geoProvider": {
+      "title": "Lookup service for country checks",
+      "description": "\"ipwhois\" or \"geojs\" (both HTTPS) or \"ipapi\" (unencrypted HTTP). If unset, users decide.",
+      "type": "string",
+      "enum": [
+        "ipwhois",
+        "geojs",
+        "ipapi"
+      ]
+    },
+    "protectedEmailDomains": {
+      "title": "Company e-mail domains",
+      "description": "E-mail domains of the organization, e.g. \"example.com\". Typing an address of such a domain on a non-whitelisted page shows a warning at the field.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "protectedLogins": {
+      "title": "Additional sign-in names of the user",
+      "description": "Optional, set per user: further names (e.g. the logon name) that trigger the same warning.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "enableWarningBar": {
+      "title": "Warning bar",
+      "description": "Forces the red warning bar on non-whitelisted pages on or off. If unset, users decide.",
+      "type": "boolean"
+    },
+    "warningBarSize": {
+      "title": "Height of the warning bar",
+      "description": "\"slim\" (one small line, default) or \"normal\". If unset, users decide.",
+      "type": "string",
+      "enum": [
+        "slim",
+        "normal"
+      ]
+    }
+  }
+}

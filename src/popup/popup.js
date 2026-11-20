@@ -1,7 +1,8 @@
-// Use the appropriate API based on browser environment
-const browserAPI = typeof browser !== "undefined" ? browser : chrome;
+// common.js is loaded before this file (see popup.html).
 
 document.addEventListener("DOMContentLoaded", function () {
+  localizePage();
+
   // Load and display whitelist
   loadWhitelist();
 
@@ -13,10 +14,15 @@ document.addEventListener("DOMContentLoaded", function () {
     addDomain();
   });
 
-  // Add current domain button
-  document.getElementById("add-current").addEventListener("click", function () {
-    addCurrentDomain();
-  });
+  // Remove entries that are covered by other entries
+  document
+    .getElementById("redundant-clean")
+    .addEventListener("click", function () {
+      cleanUpRedundantEntries();
+    });
+
+  // Current website and its whitelisting options
+  loadCurrentPage();
 
   // Enter key in input field
   document
@@ -57,6 +63,30 @@ document.addEventListener("DOMContentLoaded", function () {
       toggleCountryBlock(this.checked);
     });
 
+  // Lookup service for country checks
+  document
+    .getElementById("geo-provider")
+    .addEventListener("change", function () {
+      browserAPI.storage.sync.set({ geoProvider: this.value });
+    });
+
+  // Warning bar toggle
+  document
+    .getElementById("warning-bar-toggle")
+    .addEventListener("change", function () {
+      browserAPI.runtime.sendMessage({
+        action: "toggleWarningBar",
+        enabled: this.checked,
+      });
+    });
+
+  // Height of the warning bar
+  document
+    .getElementById("warning-bar-size")
+    .addEventListener("change", function () {
+      browserAPI.storage.sync.set({ warningBarSize: this.value });
+    });
+
   // Load countries selector
   loadCountries();
 
@@ -93,16 +123,54 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 async function loadToggleState() {
-  const result = await browserAPI.storage.sync.get([
-    "enablePreemptiveChecks",
-    "enableCountryBlock",
-  ]);
-  document.getElementById("preemptive-check-toggle").checked =
-    result.enablePreemptiveChecks === undefined
-      ? true
-      : result.enablePreemptiveChecks;
-  document.getElementById("country-block-toggle").checked =
-    result.enableCountryBlock === undefined ? true : result.enableCountryBlock;
+  const settings = await loadSettings();
+  // Settings fixed by the organization are not shown at all: the user
+  // cannot change them anyway.
+  const toggles = [
+    ["preemptive-check-toggle", "enablePreemptiveChecks"],
+    ["country-block-toggle", "enableCountryBlock"],
+    ["warning-bar-toggle", "enableWarningBar"],
+  ];
+  for (const [toggleId, key] of toggles) {
+    const toggle = document.getElementById(toggleId);
+    toggle.checked = settings[key];
+    toggle.disabled = settings.locked[key];
+  }
+  const locked = settings.locked;
+  document.getElementById("preemptive-box").hidden = locked.enablePreemptiveChecks;
+  document.getElementById("country-box").hidden = locked.enableCountryBlock;
+
+  // Warning bar: the switch and the height can be fixed separately. The
+  // height is only offered while the bar is shown.
+  const barSwitchHidden = locked.enableWarningBar;
+  const barSizeHidden = locked.warningBarSize || !settings.enableWarningBar;
+  document.getElementById("warning-bar-switch").hidden = barSwitchHidden;
+  document.getElementById("warning-bar-size-row").hidden = barSizeHidden;
+  document.getElementById("warning-bar-box").hidden = barSwitchHidden && barSizeHidden;
+
+  document.getElementById("options-heading").hidden =
+    document.getElementById("preemptive-box").hidden &&
+    document.getElementById("warning-bar-box").hidden;
+
+  // Country checks switched off by the organization: hide the whole tab.
+  const countryOff = settings.locked.enableCountryBlock && !settings.enableCountryBlock;
+  const countryTab = document.querySelector('.tab[data-tab="country"]');
+  countryTab.hidden = countryOff;
+  if (countryOff && countryTab.classList.contains("active")) {
+    document.querySelector('.tab[data-tab="domains"]').click();
+  }
+
+  const barSize = document.getElementById("warning-bar-size");
+  barSize.value = settings.warningBarSize;
+  barSize.disabled = settings.locked.warningBarSize;
+
+  const provider = document.getElementById("geo-provider");
+  provider.value = settings.geoProvider;
+  provider.disabled = settings.locked.geoProvider;
+  document.getElementById("geo-provider-row").hidden = settings.locked.geoProvider;
+  document.getElementById("geo-provider-info").textContent = t(
+    `geoProviderInfo_${settings.geoProvider}`,
+  );
 }
 
 function togglePreemptiveChecks(enabled) {
@@ -118,3 +186,13 @@ function toggleCountryBlock(enabled) {
     enabled: enabled,
   });
 }
+
+// Keep the popup in sync with policy and storage changes
+browserAPI.storage.onChanged.addListener((changes, areaName) => {
+  if (settingsChanged(changes, areaName)) {
+    loadToggleState();
+    loadWhitelist();
+    loadCurrentPage();
+    loadBlockedCountries();
+  }
+});

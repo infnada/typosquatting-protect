@@ -1,0 +1,293 @@
+{
+  "extDescription": {
+    "message": "Schützt vor Typosquatting und Phishing: warnt bei Domains, die nicht auf der Whitelist stehen, und prüft das Herkunftsland"
+  },
+  "barBefore": {
+    "message": "⚠️ Unbekannte Webseite: "
+  },
+  "barAfter": {
+    "message": " könnte unsicher sein"
+  },
+  "barClose": {
+    "message": "Für diese Website ausblenden"
+  },
+  "confirmPageTitle": {
+    "message": "Domain-Sicherheitsprüfung"
+  },
+  "confirmHeading": {
+    "message": "Unbekannte Webseite"
+  },
+  "confirmIntro": {
+    "message": "Diese Webseite ist noch nicht freigegeben:"
+  },
+  "confirmHint": {
+    "message": "Im Zweifel keine Passwörter oder persönlichen Daten eingeben."
+  },
+  "confirmWhitelist": {
+    "message": "Freigeben und fortfahren"
+  },
+  "confirmWildcard": {
+    "message": "$1 freigeben und fortfahren"
+  },
+  "confirmContinue": {
+    "message": "Einmalig öffnen"
+  },
+  "confirmExit": {
+    "message": "Seite nicht laden"
+  },
+  "confirmManaged": {
+    "message": "Die Whitelist wird von Ihrer Organisation verwaltet."
+  },
+  "geoFailed": {
+    "message": "Länderabfrage fehlgeschlagen"
+  },
+  "geoBlockedTitle": {
+    "message": "Blockiertes Land"
+  },
+  "geoRiskHeading": {
+    "message": "Warnung: geografisches Risiko"
+  },
+  "geoRiskText": {
+    "message": "Diese Domain stammt aus einem blockierten Land."
+  },
+  "geoHeading": {
+    "message": "Standort:"
+  },
+  "geoCountry": {
+    "message": "Land"
+  },
+  "geoRegion": {
+    "message": "Region"
+  },
+  "geoIp": {
+    "message": "IP"
+  },
+  "geoIsp": {
+    "message": "Anbieter"
+  },
+  "geoRisk": {
+    "message": "Risikostufe"
+  },
+  "geoRiskHigh": {
+    "message": "Hoch"
+  },
+  "geoRiskLow": {
+    "message": "Niedrig"
+  },
+  "unknown": {
+    "message": "Unbekannt"
+  },
+  "tabDomains": {
+    "message": "Domains"
+  },
+  "tabCountry": {
+    "message": "Länder"
+  },
+  "tabImportExport": {
+    "message": "Import/Export"
+  },
+  "tabAbout": {
+    "message": "Info"
+  },
+  "preemptiveTitle": {
+    "message": "Vorabprüfung von Domains"
+  },
+  "preemptiveText": {
+    "message": "Domains prüfen, bevor Seiten geladen werden"
+  },
+  "managedByOrg": {
+    "message": "Von Ihrer Organisation verwaltet"
+  },
+  "managedHeading": {
+    "message": "Firmen-Whitelist"
+  },
+  "userLocked": {
+    "message": "Ihre Organisation erlaubt keine eigenen Domains."
+  },
+  "domainPlaceholder": {
+    "message": "z. B. example.com, *.example.com"
+  },
+  "add": {
+    "message": "Hinzufügen"
+  },
+  "userHeading": {
+    "message": "Eigene Whitelist"
+  },
+  "emptyWhitelist": {
+    "message": "Keine Domains auf der Whitelist"
+  },
+  "remove": {
+    "message": "Entfernen"
+  },
+  "badgeWildcard": {
+    "message": "WILDCARD"
+  },
+  "badgeManaged": {
+    "message": "VERWALTET"
+  },
+  "alertInvalidDomain": {
+    "message": "Das ist keine gültige Domain."
+  },
+  "alertAlreadyListed": {
+    "message": "Diese Domain steht bereits auf Ihrer Whitelist."
+  },
+  "countryHeading": {
+    "message": "Länder blockieren"
+  },
+  "countryWarningNote": {
+    "message": "Hinweis: Es besteht keine Verbindung oder Vereinbarung mit diesen Diensten."
+  },
+  "countryToggleTitle": {
+    "message": "Länderprüfung"
+  },
+  "countryToggleText": {
+    "message": "Ausschalten beendet alle Abfragen"
+  },
+  "countrySelect": {
+    "message": "Land zum Blockieren wählen"
+  },
+  "countryBlock": {
+    "message": "Land blockieren"
+  },
+  "emptyCountries": {
+    "message": "Keine Länder blockiert"
+  },
+  "exportData": {
+    "message": "Daten exportieren"
+  },
+  "importData": {
+    "message": "Daten importieren"
+  },
+  "alertImportFormat": {
+    "message": "Ungültiges Format. Die Datei muss ein JSON-Objekt mit den Listen 'whitelist' und 'countryBlock' enthalten."
+  },
+  "alertImportDone": {
+    "message": "$1 Domains und $2 blockierte Länder wurden importiert."
+  },
+  "alertImportError": {
+    "message": "Fehler beim Lesen der Datei: $1"
+  },
+  "aboutText": {
+    "message": "Eine Browser-Erweiterung, die Sie beim Surfen schützt: Sie geben vertrauenswürdige Domains frei und werden vor allen anderen gewarnt."
+  },
+  "aboutGithub": {
+    "message": "Auf GitHub ansehen"
+  },
+  "homographTitle": {
+    "message": "Täuschend ähnliche Zeichen erkannt"
+  },
+  "homographImitates": {
+    "message": "Diese Adresse sieht aus wie $1 von Ihrer Whitelist, ist aber eine andere Domain. Sie verwendet Zeichen aus einem anderen Alphabet, die genauso aussehen."
+  },
+  "homographMixed": {
+    "message": "Diese Domain mischt Buchstaben aus verschiedenen Alphabeten. Das ist ein verbreiteter Phishing-Trick."
+  },
+  "homographLookalike": {
+    "message": "Diese Domain ist mit Buchstaben eines anderen Alphabets geschrieben, die wie lateinische Buchstaben aussehen."
+  },
+  "homographShownAs": {
+    "message": "Angezeigt als:"
+  },
+  "homographRealName": {
+    "message": "Tatsächliche Adresse:"
+  },
+  "barHomographImitates": {
+    "message": " – Nachahmung von $1!"
+  },
+  "barHomograph": {
+    "message": " – enthält täuschend ähnliche Zeichen!"
+  },
+  "noticeHeading": {
+    "message": "Hinweis Ihrer Organisation"
+  },
+  "redundantNote": {
+    "message": "Bereits durch andere Einträge abgedeckt: $1"
+  },
+  "redundantClean": {
+    "message": "Aufräumen"
+  },
+  "geoProviderLabel": {
+    "message": "Abfragedienst"
+  },
+  "geoProviderIpwhois": {
+    "message": "ipwho.is (verschlüsselt)"
+  },
+  "geoProviderIpapi": {
+    "message": "ip-api.com (unverschlüsselt)"
+  },
+  "geoProviderInfo_ipwhois": {
+    "message": "Bei Domains, die nicht auf der Whitelist stehen, wird der Domainname verschlüsselt an Google Public DNS gesendet, um die IP-Adresse zu ermitteln. Die IP-Adresse geht anschließend verschlüsselt an ipwho.is."
+  },
+  "geoProviderInfo_ipapi": {
+    "message": "⚠️ Bei Domains, die nicht auf der Whitelist stehen, wird der Domainname unverschlüsselt an ip-api.com gesendet. Wer im Netzwerk mitliest, sieht die aufgerufenen Domains und könnte die Antwort verfälschen."
+  },
+  "geoProviderGeojs": {
+    "message": "geojs.io (verschlüsselt)"
+  },
+  "geoProviderInfo_geojs": {
+    "message": "Bei Domains, die nicht auf der Whitelist stehen, wird der Domainname verschlüsselt an Google Public DNS gesendet, um die IP-Adresse zu ermitteln. Die IP-Adresse geht anschließend verschlüsselt an geojs.io. Bei einigen großen Hosting-Netzen kann dieser Dienst kein Land nennen."
+  },
+  "similarTitle": {
+    "message": "Ähnelt einer Domain auf der Whitelist"
+  },
+  "similarText": {
+    "message": "Diese Domain ähnelt $1 von Ihrer Whitelist, ist aber eine andere Domain. Prüfen Sie die Schreibweise genau, bevor Sie fortfahren."
+  },
+  "barSimilar": {
+    "message": " – ähnelt $1!"
+  },
+  "loginWarningTitle": {
+    "message": "⚠️ Achtung: Firmen-Anmeldung eingegeben"
+  },
+  "loginWarningText": {
+    "message": "$1 steht nicht auf der Whitelist. Geben Sie hier kein Passwort ein, wenn Sie nicht sicher sind, dass diese Seite echt ist."
+  },
+  "suspicionNoWhitelist": {
+    "message": "Wegen dieses Verdachts kann die Domain hier nicht freigegeben werden."
+  },
+  "confirmSuspicious": {
+    "message": "Vorsicht: $1 sieht aus wie $2 von der Whitelist, ist aber eine andere Domain. Trotzdem hinzufügen?"
+  },
+  "warningBarTitle": {
+    "message": "Warnleiste"
+  },
+  "warningBarText": {
+    "message": "Rote Leiste auf Seiten anzeigen, die nicht auf der Whitelist stehen"
+  },
+  "warningBarSizeLabel": {
+    "message": "Höhe:"
+  },
+  "warningBarSizeSlim": {
+    "message": "Schmal"
+  },
+  "warningBarSizeNormal": {
+    "message": "Normal"
+  },
+  "barHint": {
+    "message": "Freigeben über das Symbol der Erweiterung"
+  },
+  "currentPage": {
+    "message": "Aktuelle Seite"
+  },
+  "releaseExact": {
+    "message": "Nur $1 freigeben"
+  },
+  "releaseWildcard": {
+    "message": "$1 freigeben"
+  },
+  "currentWhitelisted": {
+    "message": "✓ Freigegeben (eigene Whitelist)"
+  },
+  "currentManaged": {
+    "message": "✓ Freigegeben (Firmen-Whitelist)"
+  },
+  "currentSuspicious": {
+    "message": "Sieht aus wie $1 – nicht freigeben"
+  },
+  "optionsHeading": {
+    "message": "Optionen"
+  },
+  "alertSuffixWildcard": {
+    "message": "Diese Wildcard würde eine ganze Domain-Endung freigeben (zum Beispiel *.co.uk). Bitte eine konkrete Domain angeben."
+  }
+}
