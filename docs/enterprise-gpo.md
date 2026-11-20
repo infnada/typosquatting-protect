@@ -446,6 +446,10 @@ werden.
 Im Popup der Erweiterung erscheinen diese Einträge mit dem Kennzeichen
 **VERWALTET**. Benutzer sehen sie, können sie aber nicht entfernen.
 
+Einstellungen, die per Richtlinie festgelegt sind (zum Beispiel
+Vorabprüfung, Warnleiste, Höhe der Leiste oder Abfragedienst), blendet das
+Popup dagegen ganz aus, weil Benutzer sie ohnehin nicht ändern können.
+
 Domains, die einer Domain der Whitelist zum Verwechseln ähnlich sehen, zum
 Beispiel `sharepoint-login.com` oder `micros0ft.com`, lösen auf der
 Bestätigungsseite eine zusätzliche Warnung aus. Deshalb lohnt es sich, die

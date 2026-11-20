@@ -59,9 +59,24 @@ test("organization whitelist and locked settings", { skip }, async () => {
   );
   assert.ok(await popup.locator("#user-section").isHidden());
   assert.ok(await popup.locator("#user-whitelist-locked").isVisible());
-  assert.ok(await popup.locator("#preemptive-check-toggle").isDisabled());
-  assert.ok(await popup.locator("#preemptive-check-toggle").isChecked());
+  // Settings fixed by the organization are hidden, the others stay.
+  assert.ok(await popup.locator("#preemptive-box").isHidden());
+  assert.ok(await popup.locator("#warning-bar-box").isVisible());
+  assert.ok(await popup.locator("#options-heading").isVisible());
   assert.ok(!(await popup.locator("#country-block-toggle").isDisabled()));
+});
+
+test("options fixed by the organization are hidden", { skip }, async () => {
+  await relaunch({
+    policy: { enablePreemptiveChecks: false, enableWarningBar: true, warningBarSize: "slim", geoProvider: "geojs" },
+  });
+  const popup = await app.openPopup();
+  assert.ok(await popup.locator("#preemptive-box").isHidden());
+  assert.ok(await popup.locator("#warning-bar-box").isHidden());
+  assert.ok(await popup.locator("#options-heading").isHidden());
+  await popup.click('.tab[data-tab="country"]');
+  assert.ok(await popup.locator("#geo-provider-row").isHidden());
+  assert.ok(await popup.locator("#country-box").isVisible());
 });
 
 test("a policy change applies without restarting the browser", { skip }, async () => {

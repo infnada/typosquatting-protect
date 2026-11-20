@@ -124,17 +124,33 @@ document.addEventListener("DOMContentLoaded", function () {
 
 async function loadToggleState() {
   const settings = await loadSettings();
+  // Settings fixed by the organization are not shown at all: the user
+  // cannot change them anyway.
   const toggles = [
-    ["preemptive-check-toggle", "preemptive-managed", "enablePreemptiveChecks"],
-    ["country-block-toggle", "country-managed", "enableCountryBlock"],
-    ["warning-bar-toggle", "warning-bar-managed", "enableWarningBar"],
+    ["preemptive-check-toggle", "enablePreemptiveChecks"],
+    ["country-block-toggle", "enableCountryBlock"],
+    ["warning-bar-toggle", "enableWarningBar"],
   ];
-  for (const [toggleId, noteId, key] of toggles) {
+  for (const [toggleId, key] of toggles) {
     const toggle = document.getElementById(toggleId);
     toggle.checked = settings[key];
     toggle.disabled = settings.locked[key];
-    document.getElementById(noteId).hidden = !settings.locked[key];
   }
+  const locked = settings.locked;
+  document.getElementById("preemptive-box").hidden = locked.enablePreemptiveChecks;
+  document.getElementById("country-box").hidden = locked.enableCountryBlock;
+
+  // Warning bar: the switch and the height can be fixed separately. The
+  // height is only offered while the bar is shown.
+  const barSwitchHidden = locked.enableWarningBar;
+  const barSizeHidden = locked.warningBarSize || !settings.enableWarningBar;
+  document.getElementById("warning-bar-switch").hidden = barSwitchHidden;
+  document.getElementById("warning-bar-size-row").hidden = barSizeHidden;
+  document.getElementById("warning-bar-box").hidden = barSwitchHidden && barSizeHidden;
+
+  document.getElementById("options-heading").hidden =
+    document.getElementById("preemptive-box").hidden &&
+    document.getElementById("warning-bar-box").hidden;
 
   // Country checks switched off by the organization: hide the whole tab.
   const countryOff = settings.locked.enableCountryBlock && !settings.enableCountryBlock;
@@ -151,8 +167,7 @@ async function loadToggleState() {
   const provider = document.getElementById("geo-provider");
   provider.value = settings.geoProvider;
   provider.disabled = settings.locked.geoProvider;
-  document.getElementById("geo-provider-managed").hidden =
-    !settings.locked.geoProvider;
+  document.getElementById("geo-provider-row").hidden = settings.locked.geoProvider;
   document.getElementById("geo-provider-info").textContent = t(
     `geoProviderInfo_${settings.geoProvider}`,
   );

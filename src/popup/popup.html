@@ -482,20 +482,12 @@
         <ul id="whitelist"></ul>
       </div>
 
-      <h3 class="section-title" data-i18n="optionsHeading">Options</h3>
-      <div class="toggle-container">
+      <h3 class="section-title" id="options-heading" data-i18n="optionsHeading">Options</h3>
+      <div class="toggle-container" id="preemptive-box">
         <div class="toggle-label">
           <strong data-i18n="preemptiveTitle">Preemptive Domain Checks</strong>
           <div data-i18n="preemptiveText">
             Check domains before loading pages
-          </div>
-          <div
-            class="managed-note"
-            id="preemptive-managed"
-            data-i18n="managedByOrg"
-            hidden
-          >
-            Managed by your organization
           </div>
         </div>
         <label class="toggle">
@@ -504,13 +496,13 @@
         </label>
       </div>
 
-      <div class="toggle-container">
+      <div class="toggle-container" id="warning-bar-box">
         <div class="toggle-label">
           <strong data-i18n="warningBarTitle">Warning Bar</strong>
           <div data-i18n="warningBarText">
             Show a red bar on non-whitelisted pages
           </div>
-          <div class="bar-size-row">
+          <div class="bar-size-row" id="warning-bar-size-row">
             <label for="warning-bar-size" data-i18n="warningBarSizeLabel">
               Height:
             </label>
@@ -521,16 +513,8 @@
               </option>
             </select>
           </div>
-          <div
-            class="managed-note"
-            id="warning-bar-managed"
-            data-i18n="managedByOrg"
-            hidden
-          >
-            Managed by your organization
-          </div>
         </div>
-        <label class="toggle">
+        <label class="toggle" id="warning-bar-switch">
           <input type="checkbox" id="warning-bar-toggle" checked />
           <span class="slider"></span>
         </label>
@@ -549,6 +533,7 @@
     <div id="country" class="tab-content">
       <h3 class="section-title" data-i18n="countryHeading">Country Blocking</h3>
       <div class="warning">
+        <div id="geo-provider-row">
         <label for="geo-provider" data-i18n="geoProviderLabel">
           Lookup service
         </label>
@@ -563,27 +548,17 @@
             ip-api.com (not encrypted)
           </option>
         </select>
-        <div class="managed-note" id="geo-provider-managed" data-i18n="managedByOrg" hidden>
-          Managed by your organization
         </div>
         <p id="geo-provider-info"></p>
         <p data-i18n="countryWarningNote">
           Please note: We have no affiliation or agreement with these services.
         </p>
       </div>
-      <div class="toggle-container">
+      <div class="toggle-container" id="country-box">
         <div class="toggle-label">
           <strong data-i18n="countryToggleTitle">Country Checks</strong>
           <div data-i18n="countryToggleText">
             Turning this off stops all lookup requests
-          </div>
-          <div
-            class="managed-note"
-            id="country-managed"
-            data-i18n="managedByOrg"
-            hidden
-          >
-            Managed by your organization
           </div>
         </div>
         <label class="toggle">
