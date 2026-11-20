@@ -3,7 +3,7 @@
     "message": "Schützt vor Typosquatting und Phishing: warnt bei Domains, die nicht auf der Whitelist stehen, und prüft das Herkunftsland"
   },
   "barBefore": {
-    "message": "⚠️ Domain nicht auf der Whitelist: "
+    "message": "⚠️ Unbekannte Webseite: "
   },
   "barAfter": {
     "message": " könnte unsicher sein"
@@ -15,13 +15,13 @@
     "message": "Domain-Sicherheitsprüfung"
   },
   "confirmHeading": {
-    "message": "Domain nicht auf der Whitelist"
+    "message": "Unbekannte Webseite"
   },
   "confirmIntro": {
-    "message": "Sie sind dabei, eine Domain zu öffnen, die nicht auf Ihrer Whitelist steht:"
+    "message": "Diese Webseite ist noch nicht freigegeben:"
   },
   "confirmHint": {
-    "message": "Es könnte sich um Typosquatting oder einen Phishing-Versuch handeln."
+    "message": "Im Zweifel keine Passwörter oder persönlichen Daten eingeben."
   },
   "confirmWhitelist": {
     "message": "Freigeben und fortfahren"

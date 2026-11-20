@@ -15,13 +15,13 @@
     "message": "Domain Safety Check"
   },
   "confirmHeading": {
-    "message": "Non-Whitelisted Domain"
+    "message": "Unknown Website"
   },
   "confirmIntro": {
-    "message": "You are about to visit a domain that is not in your whitelist:"
+    "message": "This website has not been approved yet:"
   },
   "confirmHint": {
-    "message": "This could potentially be a typosquatting or phishing attempt."
+    "message": "If in doubt, do not enter passwords or personal data."
   },
   "confirmWhitelist": {
     "message": "Whitelist and Continue"

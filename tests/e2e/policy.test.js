@@ -159,7 +159,7 @@ test("country checks switched off by the organization are hidden", { skip }, asy
 test("the interface follows the browser language", { skip: false }, async () => {
   const page = await relaunch({ locale: "de-DE" });
   await gotoBlocked(page, "unknown-shop.net");
-  assert.equal(await page.textContent("#title"), "Domain nicht auf der Whitelist");
+  assert.equal(await page.textContent("#title"), "Unbekannte Webseite");
   assert.match(await page.locator("#security-details").innerText(), /Land: Deutschland/);
   const popup = await app.openPopup();
   assert.equal((await popup.locator('[data-tab="country"]').innerText()).trim(), "Länder");

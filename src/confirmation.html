@@ -214,19 +214,26 @@
   <body>
     <div class="container">
       <div class="warning-icon" id="icon">&#9888;&#65039;</div>
-      <h2 id="title" data-i18n="confirmHeading">Non-Whitelisted Domain</h2>
+      <h2 id="title" data-i18n="confirmHeading">Unknown Website</h2>
       <p data-i18n="confirmIntro">
-        You are about to visit a domain that is not in your whitelist:
+        This website has not been approved yet:
       </p>
       <div class="domain" id="domain-name"></div>
       <p data-i18n="confirmHint">
-        This could potentially be a typosquatting or phishing attempt.
+        If in doubt, do not enter passwords or personal data.
       </p>
       <div class="homograph-warning" id="homograph-warning" hidden></div>
       <div class="similar-warning" id="similar-warning" hidden></div>
       <div class="security-details" id="security-details"></div>
       <div class="org-notice" id="org-notice" hidden></div>
       <div class="buttons">
+        <button
+          class="continue-only"
+          id="just-continue"
+          data-i18n="confirmContinue"
+        >
+          Continue Without Whitelisting
+        </button>
         <button
           class="continue-whitelist"
           id="whitelist-continue"
@@ -236,13 +243,6 @@
         </button>
         <button class="continue-wildcard" id="wildcard-continue">
           Whitelist with Wildcard and Continue
-        </button>
-        <button
-          class="continue-only"
-          id="just-continue"
-          data-i18n="confirmContinue"
-        >
-          Continue Without Whitelisting
         </button>
         <button class="exit" id="exit-page" data-i18n="confirmExit">
           Don't Load This Page
