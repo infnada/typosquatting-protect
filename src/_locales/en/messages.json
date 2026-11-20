@@ -30,7 +30,7 @@
     "message": "Whitelist $1 and Continue"
   },
   "confirmContinue": {
-    "message": "Continue Without Whitelisting"
+    "message": "Open Once"
   },
   "confirmExit": {
     "message": "Don't Load This Page"

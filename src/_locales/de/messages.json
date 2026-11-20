@@ -30,7 +30,7 @@
     "message": "$1 freigeben und fortfahren"
   },
   "confirmContinue": {
-    "message": "Ohne Freigabe fortfahren"
+    "message": "Einmalig öffnen"
   },
   "confirmExit": {
     "message": "Seite nicht laden"

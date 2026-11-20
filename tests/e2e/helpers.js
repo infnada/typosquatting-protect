@@ -226,7 +226,7 @@ async function gotoBlocked(page, host, pathname = "/") {
   await page.locator("body[data-ready]").waitFor({ state: "attached" });
 }
 
-// Opens a non-whitelisted host and chooses "Continue Without Whitelisting".
+// Opens a non-whitelisted host and chooses "Open Once".
 async function gotoAndContinue(page, host, pathname = "/") {
   await gotoBlocked(page, host, pathname);
   await page.click("#just-continue");
